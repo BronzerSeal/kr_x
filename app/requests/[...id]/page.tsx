@@ -2,7 +2,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getMockUser } from "@/utils/auth";
+import { DollarSign, TrainTrack } from "lucide-react";
 import {
   RequestData,
   FulfillmentStatus,
@@ -14,6 +14,8 @@ import { DocumentSection } from "@/components/DocumentSection";
 import { convertFiles } from "@/utils/convertFiles";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/react";
 
 interface RequestDetail extends RequestData {
   employee_name: string;
@@ -408,9 +410,9 @@ export default function RequestDetailsPage() {
         </div>
 
         {request.is_modified && (
-          <div className="mb-4 p-4 bg-red-50 text-red-800 border border-red-200 rounded-lg">
+          <div className="mb-4 p-4 bg-red-50 text-red-800 border border-red-200 rounded-lg flex items-center">
             <p className="font-bold">
-              ⚠️ Внимание! В заявку были внесены изменения.
+              Внимание! В заявку были внесены изменения.
             </p>
             <ul className="list-disc list-inside text-sm mt-2">
               {request.change_history.slice(-3).map((c, i) => (
@@ -461,61 +463,76 @@ export default function RequestDetailsPage() {
 
         {/* БЛОК ДОРАБОТКИ (Сотрудник) */}
         {isCreator && request.status === "created" && (
-          <div className="mb-6 p-4 bg-orange-50 border border-orange-200 rounded-lg shadow-sm">
+          <div className="mb-6 p-4 bg-gray-50 border border-gray-300 rounded-lg shadow-sm">
             <h3 className="font-bold text-orange-800 mb-3">
               🛠️ Доработка заявки
             </h3>
             <div className="grid grid-cols-2 gap-3 mb-3">
-              <input
-                className="border p-2 rounded"
+              <Input
+                color="warning"
+                label="Направление"
                 placeholder="Направление"
+                startContent={<TrainTrack />}
                 value={empEditDest}
                 onChange={(e) => setEmpEditDest(e.target.value)}
               />
-              <input
-                className="border p-2 rounded"
-                type="number"
+              <Input
+                // type="number"
                 placeholder="Бюджет"
+                startContent={<DollarSign />}
+                label="Бюджет"
+                color="warning"
                 value={empEditCost}
                 onChange={(e) => setEmpEditCost(Number(e.target.value))}
               />
             </div>
-            <button
-              onClick={handleResubmit}
-              className="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-700 transition"
+            <Button
+              onPress={handleResubmit}
+              // className="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-700 transition"
+              className="font-semibold"
+              color="warning"
+              variant="shadow"
+              radius="sm"
             >
               Повторно отправить на согласование
-            </button>
+            </Button>
           </div>
         )}
 
         {/* БЛОК ИЗМЕНЕНИЯ И ОДОБРЕНИЯ (Менеджер/Финансист) */}
         {canModify && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg shadow-sm">
-            <h3 className="font-bold text-yellow-800 mb-3">
+          <div className="mb-6 p-4 bg-gray-50 border border-[#ffffffa6] rounded-lg shadow-sm">
+            <h3 className="font-bold text-gray-800 mb-3">
               ⚙️ Корректировка и Согласование
             </h3>
             <div className="grid grid-cols-3 gap-3 mb-4">
-              <input
-                className="border p-2 rounded"
+              <Input
+                size="lg"
+                radius="sm"
                 type="number"
+                label="Бюджет (₽)"
                 placeholder="Бюджет (₽)"
                 value={editCost}
                 onChange={(e) => setEditCost(Number(e.target.value))}
               />
               {isManager && (
-                <input
-                  className="border p-2 rounded"
+                <Input
+                  size="lg"
+                  radius="sm"
                   type="date"
+                  label="Начало"
                   placeholder="Начало"
                   value={editStart ? editStart.toISOString().split("T")[0] : ""}
                   onChange={(e) => setEditStart(new Date(e.target.value))}
                 />
               )}
               {isManager && (
-                <input
-                  className="border p-2 rounded"
+                <Input
+                  size="lg"
+                  radius="sm"
+                  // className="border p-2 rounded"
                   type="date"
+                  label="Конец"
                   placeholder="Конец"
                   value={editEnd ? editEnd.toISOString().split("T")[0] : ""}
                   onChange={(e) => setEditEnd(new Date(e.target.value))}
@@ -523,24 +540,33 @@ export default function RequestDetailsPage() {
               )}
             </div>
             <div className="flex space-x-3">
-              <button
-                onClick={handleModify}
-                className="bg-sky-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-sky-700 transition"
+              <Button
+                onPress={handleModify}
+                color="primary"
+                size="lg"
+                variant="shadow"
+                className="bg-sky-600 text-white px-4 py-2 rounded-lg font-semibold "
               >
                 Изменить и Одобрить
-              </button>
-              <button
-                onClick={() => handleAction("approved")}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition"
+              </Button>
+              <Button
+                onPress={() => handleAction("approved")}
+                color="success"
+                size="lg"
+                variant="shadow"
+                className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold "
               >
                 Одобрить без изменений
-              </button>
-              <button
-                onClick={() => handleAction("rejected")}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition"
+              </Button>
+              <Button
+                onPress={() => handleAction("rejected")}
+                color="danger"
+                size="lg"
+                variant="shadow"
+                className=" text-white px-4 py-2 rounded-lg font-semibold "
               >
                 Отклонить
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -548,18 +574,23 @@ export default function RequestDetailsPage() {
         {/* БЛОК СТАНДАРТНОГО ОДОБРЕНИЯ */}
         {canApprove && (
           <div className="mb-6">
-            <button
-              onClick={() => handleAction("approved")}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition mr-3"
+            <Button
+              size="lg"
+              radius="sm"
+              variant="shadow"
+              onPress={() => handleAction("approved")}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold  mr-3"
             >
               Одобрить
-            </button>
-            <button
-              onClick={() => handleAction("rejected")}
+            </Button>
+            <Button
+              size="lg"
+              radius="sm"
+              onPress={() => handleAction("rejected")}
               className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition"
             >
               Отклонить
-            </button>
+            </Button>
           </div>
         )}
 
@@ -588,7 +619,7 @@ export default function RequestDetailsPage() {
               <div className="mt-4 border-t pt-4">
                 <h4 className="font-semibold mb-2">Отчет о выполнении</h4>
                 <textarea
-                  className="w-full border p-2 rounded mb-2 h-32"
+                  className="w-full border p-2  rounded mb-2 h-32"
                   placeholder="Детальный отчет о поездке..."
                   value={reportText}
                   onChange={(e) => setReportText(e.target.value)}
@@ -620,7 +651,7 @@ export default function RequestDetailsPage() {
             <h3 className="font-bold text-blue-800 mb-3">
               📄 Отчет о выполнении
             </h3>
-            <p className="whitespace-pre-wrap text-gray-700 mb-3 border-b pb-3">
+            <p className="whitespace-pre-wrap text-gray-700 mb-3 border-b border-gray-400 pb-3">
               {request.report_text || "Текстовый отчет не предоставлен."}
             </p>
 

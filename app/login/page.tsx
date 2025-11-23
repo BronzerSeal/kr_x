@@ -3,7 +3,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithCredentials } from "@/actions/sign-in";
 import { useAuthStore } from "@/store/auth.store";
-import { useSession } from "next-auth/react";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/react";
+import { toast } from "react-toastify";
 // import { useSession } from "next-auth/react";
 
 export default function LoginPage() {
@@ -35,47 +37,49 @@ export default function LoginPage() {
       window.location.reload();
     } catch (error) {
       console.log(error);
+      toast.error("Неверный логин или пароль");
     }
   };
-  console.log("session: ", session);
-  console.log("status: ", status);
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
         <h1 className="text-3xl font-bold text-center text-sky-700 mb-6">
           SkyWay Travel Portal
         </h1>
+
         <p className="text-center text-sm text-gray-500 mb-4">
           Демо-логины: anna, ivan, olga, petr (введите часть почты)
         </p>
 
         <form onSubmit={handleLogin} className="space-y-4">
-          <input
+          <Input
             type="email"
-            className="w-full p-3 border border-gray-300 rounded focus:ring-sky-500 focus:border-sky-500"
-            placeholder="Email (напр. anna@skyway.com)"
+            label="Email"
+            variant="bordered"
             value={formData.email}
             onChange={(e) =>
               setFormData({ ...formData, email: e.target.value })
             }
             required
           />
-          <input
+          <Input
             type="password"
-            className="w-full p-3 border border-gray-300 rounded focus:ring-sky-500 focus:border-sky-500"
-            placeholder="Password (напр. 123456)"
+            label="password"
+            variant="bordered"
             value={formData.password}
             onChange={(e) =>
               setFormData({ ...formData, password: e.target.value })
             }
             required
           />
-          <button
+          <Button
             type="submit"
-            className="w-full bg-sky-600 text-white p-3 rounded-lg font-semibold hover:bg-sky-700 transition duration-200"
+            color="primary"
+            radius="sm"
+            className="w-full  text-white p-3  font-semibold"
           >
             Войти
-          </button>
+          </Button>
         </form>
       </div>
     </div>

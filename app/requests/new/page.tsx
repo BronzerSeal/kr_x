@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { Button, DatePicker, Input, Textarea } from "@heroui/react";
 
 interface FileAttachment {
   name: string;
@@ -30,12 +31,19 @@ const convertFilesToBase64 = (
   });
 };
 
+// Функция для преобразования объекта gregory в Date
+const parseHeroDate = (d: any): Date | null => {
+  if (!d) return null;
+  const { year, month, day } = d; // month начинается с 1
+  return new Date(year, month - 1, day);
+};
+
 export default function NewRequestPage() {
   const router = useRouter();
   const [destination, setDestination] = useState("");
   const [purpose, setPurpose] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const [startDate, setStartDate] = useState<Date | null>();
+  const [endDate, setEndDate] = useState<Date | null>(null);
   const [costEstimate, setCostEstimate] = useState<number>(0);
   const [passportFiles, setPassportFiles] = useState<FileList | null>(null);
 
@@ -53,20 +61,15 @@ export default function NewRequestPage() {
 
     try {
       console.log({
-        employee_id: user.id,
-        destination,
-        purpose,
-        start_date: startDate,
-        end_date: endDate,
-        cost_estimate: costEstimate,
-        passport_photos: passportPayload,
+        start_date: startDate ? parseHeroDate(startDate)?.toISOString() : null,
+        end_date: endDate ? parseHeroDate(endDate)?.toISOString() : null,
       });
       const res = await axios.post("/api/requests", {
         employee_id: user.id,
         destination,
         purpose,
-        start_date: startDate,
-        end_date: endDate,
+        start_date: startDate ? parseHeroDate(startDate)?.toISOString() : null,
+        end_date: endDate ? parseHeroDate(endDate)?.toISOString() : null,
         cost_estimate: costEstimate,
         passport_photos: passportPayload,
       });
@@ -110,10 +113,11 @@ export default function NewRequestPage() {
           <label className="block text-sm font-medium text-gray-700">
             Направление
           </label>
-          <input
-            className="w-full border p-3 rounded-lg focus:ring-sky-500 focus:border-sky-500"
+          <Input
             placeholder="Город, Страна"
             value={destination}
+            size="lg"
+            radius="sm"
             onChange={(e) => setDestination(e.target.value)}
             required
           />
@@ -121,8 +125,9 @@ export default function NewRequestPage() {
           <label className="block text-sm font-medium text-gray-700">
             Цель командировки
           </label>
-          <textarea
-            className="w-full border p-3 rounded-lg h-24 focus:ring-sky-500 focus:border-sky-500"
+          <Textarea
+            size="lg"
+            radius="sm"
             placeholder="Подробное описание"
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
@@ -134,11 +139,13 @@ export default function NewRequestPage() {
               <label className="block text-sm font-medium text-gray-700">
                 Дата начала
               </label>
-              <input
-                type="date"
-                className="w-full border p-3 rounded-lg"
+              <DatePicker
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={setStartDate}
+                placeholder="Выберите дату"
+                size="lg"
+                radius="sm"
+                // className="w-full border p-3 rounded-lg"
                 required
               />
             </div>
@@ -146,11 +153,12 @@ export default function NewRequestPage() {
               <label className="block text-sm font-medium text-gray-700">
                 Дата окончания
               </label>
-              <input
+              <DatePicker
                 type="date"
-                className="w-full border p-3 rounded-lg"
+                size="lg"
+                radius="sm"
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={setEndDate}
                 required
               />
             </div>
@@ -159,9 +167,10 @@ export default function NewRequestPage() {
           <label className="block text-sm font-medium text-gray-700">
             Ориентировочный бюджет (₽)
           </label>
-          <input
+          <Input
             type="number"
-            className="w-full border p-3 rounded-lg focus:ring-sky-500 focus:border-sky-500"
+            size="lg"
+            radius="sm"
             placeholder="Бюджет"
             value={costEstimate || ""}
             onChange={(e) => setCostEstimate(Number(e.target.value))}
@@ -181,12 +190,9 @@ export default function NewRequestPage() {
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-sky-600 text-white p-3 rounded-lg font-semibold hover:bg-sky-700 transition"
-          >
+          <Button type="submit" className="w-full" color="primary" size="lg">
             Отправить на согласование
-          </button>
+          </Button>
         </form>
       </div>
     </div>

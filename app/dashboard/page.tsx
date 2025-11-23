@@ -7,6 +7,8 @@ import { useAuthStore } from "@/store/auth.store";
 import { getRequests } from "@/actions/getRequests";
 import { RequestCard } from "@/components/RequestCard";
 import { signOut, useSession } from "next-auth/react";
+import { Button } from "@heroui/button";
+import { Divider } from "@heroui/react";
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
@@ -100,15 +102,15 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
-        <header className="flex justify-between items-center mb-8 border-b pb-4">
+        <header className="flex justify-between items-center mb-8 border-b pb-4 border-gray-300">
           <h1 className="text-2xl font-bold text-sky-700">
             Рабочий стол (
             {user.role === "hr" ? "Travel Coordinator" : user.role})
           </h1>
           <div className="flex items-center gap-4">
             <span className="text-sm text-gray-600">Привет, {user.email}!</span>
-            <button
-              onClick={async () => {
+            <Button
+              onPress={async () => {
                 // Очистка локального состояния
                 setUser(null);
                 setRequests([]);
@@ -118,14 +120,17 @@ export default function Dashboard() {
                 // Выход из next-auth
                 await signOut({ redirect: true, callbackUrl: "/login" });
               }}
-              className="text-red-600 border px-3 py-1 rounded hover:bg-red-50 transition"
+              // className="text-red-600 border px-3 py-1 rounded hover:bg-red-50 transition"
+              className="h-[37px]"
+              color="danger"
+              variant="shadow"
             >
               Выход
-            </button>
+            </Button>
           </div>
         </header>
 
-        <div className="flex gap-4 mb-6 border-b">
+        <div className="flex gap-4 mb-6 border-b border-gray-300">
           {user.role === "employee" && (
             <button
               onClick={() => setActiveTab("my_requests")}

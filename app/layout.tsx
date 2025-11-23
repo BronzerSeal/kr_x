@@ -1,6 +1,7 @@
 import { auth } from "@/auth/auth";
 import AppLoader from "@/hoc/app-loader";
-import "@/styles/globals.css";
+import { Providers } from "@/providers/providers";
+import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { ToastContainer } from "react-toastify";
 
@@ -18,7 +19,9 @@ export default async function RootLayout({
     <html lang="ru">
       <body className="antialiased">
         <SessionProvider session={session}>
-          <AppLoader>{children}</AppLoader>
+          <Providers>
+            <AppLoader>{children}</AppLoader>
+          </Providers>
         </SessionProvider>
         <ToastContainer />
       </body>

@@ -19,7 +19,7 @@ export const DocumentSection = ({
   };
 
   return (
-    <div className="mb-4 p-4 border rounded bg-gray-50">
+    <div className="mb-4 p-4 border rounded border-gray-400 bg-gray-50">
       <h4 className="font-bold text-sm mb-2">
         {title} ({files?.length || 0})
       </h4>
@@ -42,7 +42,7 @@ export const DocumentSection = ({
         {files?.map((f: FileAttachment, i: number) => (
           <div
             key={i}
-            className="flex justify-between text-xs bg-white p-1 border rounded"
+            className="flex justify-between text-xs bg-white p-1 border rounded border-gray-400"
           >
             <a
               href={f.file_data}
