@@ -1,0 +1,157 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String     @id @default(cuid())
+  name            String
+  email           String     @unique
+  password        String
+  role            String
+  department      String?
+  reports_to_id   String?
+  approvals       Approval[]
+  requests        Request[]
+  reportsTo       User?      @relation("UserManager", fields: [reports_to_id], references: [id])
+  subordinates    User[]     @relation("UserManager")
+  viewedByEntries ViewedBy[]
+  accounts        Account[]
+  sessions        Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id")
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Request {
+  id                     Int       @id @default(autoincrement())
+  employee_id            String
+  created_by_role        String
+  destination            String
+  purpose                String
+  start_date             DateTime
+  end_date               DateTime
+  cost_estimate          Float
+  status                 String
+  current_approver_role  String
+  fulfillment_status     String
+  report_added           Boolean   @default(false)
+  report_text            String?
+  is_modified            Boolean   @default(false)
+  last_modified_actor_id String?
+  created_at             DateTime  @default(now())
+  approvals              Approval[]
+  changeLogs             ChangeLog[]
+  hotelBookings          HotelBooking[]
+  passportPhotos         PassportPhoto[]
+  receiptFiles           ReceiptFile[]
+  employee               User      @relation(fields: [employee_id], references: [id])
+  travelTickets          TravelTicket[]
+  viewedBy               ViewedBy[]
+}
+
+model Approval {
+  id            Int       @id @default(autoincrement())
+  request_id    Int
+  approver_id   String
+  approver_role String
+  action        String
+  comment       String?
+  date          DateTime
+  approver      User     @relation(fields: [approver_id], references: [id])
+  request       Request  @relation(fields: [request_id], references: [id], onDelete: Cascade)
+
+  @@index([approver_id])
+}
+
+model ChangeLog {
+  id         Int      @id @default(autoincrement())
+  request_id Int
+  date       DateTime
+  actor_role String
+  field_name String
+  old_value  String?
+  new_value  String?
+  request    Request  @relation(fields: [request_id], references: [id], onDelete: Cascade)
+}
+
+model ViewedBy {
+  request_id Int
+  user_id    String
+  request    Request @relation(fields: [request_id], references: [id], onDelete: Cascade)
+  user       User    @relation(fields: [user_id], references: [id])
+
+  @@id([request_id, user_id])
+}
+
+model PassportPhoto {
+  id         Int    @id @default(autoincrement())
+  request_id Int
+  file_name  String
+  file_data  String
+  request    Request @relation(fields: [request_id], references: [id], onDelete: Cascade)
+}
+
+model TravelTicket {
+  id         Int    @id @default(autoincrement())
+  request_id Int
+  file_name  String
+  file_data  String
+  request    Request @relation(fields: [request_id], references: [id], onDelete: Cascade)
+}
+
+model HotelBooking {
+  id         Int    @id @default(autoincrement())
+  request_id Int
+  file_name  String
+  file_data  String
+  request    Request @relation(fields: [request_id], references: [id], onDelete: Cascade)
+}
+
+model ReceiptFile {
+  id         Int    @id @default(autoincrement())
+  request_id Int
+  file_name  String
+  file_data  String
+  request    Request @relation(fields: [request_id], references: [id], onDelete: Cascade)
+}
