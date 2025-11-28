@@ -402,7 +402,10 @@ export default function RequestDetailsPage() {
         </h1>
         <div className="flex justify-between items-center mb-6 border-b pb-4">
           <p className="text-xl font-semibold text-orange-600">
-            Текущий статус: {request.status.toUpperCase()}
+            Текущий статус:{" "}
+            {request.status === "awaiting_hr"
+              ? "AWAITING_T-C"
+              : request.status.toUpperCase()}
           </p>
           <span className="text-sm text-gray-500">
             {FULFILLMENT_LABELS[request.fulfillment_status]}

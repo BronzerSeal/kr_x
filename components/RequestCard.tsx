@@ -14,6 +14,7 @@ export const RequestCard = ({
   let statusColor: ColorVariant = "danger";
   let statusText = "";
 
+  console.log(request);
   // Определяем статус и цвет
   if (request.status === "rejected") {
     statusColor = "danger";
@@ -32,7 +33,11 @@ export const RequestCard = ({
     statusText = `ТРЕБУЕТ ДОРАБОТКИ`;
   } else if (request.status.startsWith("awaiting")) {
     statusColor = "primary";
-    statusText = `ОЖИДАЕТ ${request.current_approver_role.toUpperCase()}`;
+    statusText = `ОЖИДАЕТ ${
+      request.current_approver_role === "hr"
+        ? "T-C"
+        : request.current_approver_role.toUpperCase()
+    }`;
   } else {
     statusText = request.status.toUpperCase();
   }
