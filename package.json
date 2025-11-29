@@ -16,6 +16,7 @@
     "@heroui/system": "^2.4.23",
     "@heroui/theme": "^2.4.23",
     "@prisma/extension-accelerate": "^3.0.0",
+    "@vercel/blob": "^2.0.0",
     "axios": "^1.13.2",
     "formidable": "^3.5.4",
     "framer-motion": "^12.23.24",

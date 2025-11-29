@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/utils/prisma";
-import fs from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob"; // npm install @vercel/blob
 
 interface FileAttachment {
   name: string;
-  data: string;
+  url: string;
 }
 
-export const runtime = "nodejs"; // обязательно для работы с fs
+export const runtime = "nodejs";
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,21 +27,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await fs.mkdir(uploadDir, { recursive: true });
-
     // Файлы
     const files = formData.getAll("passport_files") as File[];
     const uploadedFiles: FileAttachment[] = [];
 
     for (const file of files) {
       const fileName = `${Date.now()}-${file.name}`;
-      const filePath = path.join(uploadDir, fileName);
 
-      const buffer = Buffer.from(await file.arrayBuffer());
-      await fs.writeFile(filePath, buffer);
+      // Загружаем файл в Vercel Blob
+      const blob = await put(fileName, file, {
+        access: "public",
+        addRandomSuffix: true, // добавляет случайный суффикс, чтобы не было конфликтов
+      });
 
-      uploadedFiles.push({ name: fileName, data: `/uploads/${fileName}` });
+      uploadedFiles.push({ name: fileName, url: blob.url });
     }
 
     const newRequest = await prisma.request.create({
@@ -65,7 +63,7 @@ export async function POST(req: NextRequest) {
           ? {
               create: uploadedFiles.map((f) => ({
                 file_name: f.name,
-                file_data: f.data,
+                file_data: f.url, // сохраняем URL на blob
               })),
             }
           : undefined,
