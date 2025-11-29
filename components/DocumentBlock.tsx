@@ -19,14 +19,6 @@ export const DocumentBlock: FC<IProps> = ({
   isCreator,
   canEditReport,
 }) => {
-  console.log({
-    request,
-    handleUpload,
-    handleDelete,
-    isTC,
-    isCreator,
-    canEditReport,
-  });
   return (
     <>
       <h2 className="text-xl font-bold text-gray-800 mb-3">Документы</h2>

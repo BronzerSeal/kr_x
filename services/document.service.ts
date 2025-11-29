@@ -9,10 +9,6 @@ export const documentService = {
     requestId?: number,
     userId?: number
   ) => {
-    console.log(document_type);
-    console.log(file_id);
-    console.log(requestId);
-    console.log(userId);
     // Если requestId отсутствует — выходим (как и было задумано)
     if (!requestId) return;
 

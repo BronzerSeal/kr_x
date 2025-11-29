@@ -7,7 +7,8 @@ import { toast } from "react-toastify";
 import { Button, DatePicker, DateValue, Input, Textarea } from "@heroui/react";
 import { convertFilesToBase64 } from "@/utils/convertFilesToBase64";
 import { newRequestService } from "@/services/newRequest.service";
-import {  getLocalTimeZone, today } from "@internationalized/date";
+import { getLocalTimeZone, today } from "@internationalized/date";
+import { parseHeroDate } from "@/utils/parseHeroDate";
 
 interface FileAttachment {
   name: string;
@@ -31,40 +32,39 @@ export default function NewRequestPage() {
     if (!user) return alert("Войдите в систему");
     if (!user.id || !startDate || !endDate) return;
 
-    let passportPayload: FileAttachment[] = [];
+    const formData = new FormData();
+    formData.append("employee_id", String(user.id));
+    formData.append("destination", destination);
+    formData.append("purpose", purpose);
+    formData.append(
+      "start_date",
+      startDate ? parseHeroDate(startDate)?.toISOString() : ""
+    );
+    formData.append(
+      "end_date",
+      endDate ? parseHeroDate(endDate)?.toISOString() : ""
+    );
+    formData.append("cost_estimate", String(costEstimate));
+
     if (passportFiles) {
-      passportPayload = await convertFilesToBase64(passportFiles);
+      Array.from(passportFiles).forEach((file) =>
+        formData.append("passport_files", file)
+      );
     }
 
     try {
-      const res = await newRequestService.createRequest({
-        userId: user.id,
-        destination,
-        purpose,
-        startDate,
-        endDate,
-        costEstimate,
-        passportPayload,
+      const response = await fetch("/api/requests", {
+        method: "POST",
+        body: formData,
       });
 
-      if (res.status === 200 || res.status === 201) {
-        toast.success("Заявка создана и отправлена менеджеру!");
-        router.push("/dashboard");
-      } else {
-        toast.error(`Ошибка создания: ${res.statusText}`);
-      }
+      if (!response.ok) throw new Error("Ошибка сервера");
+
+      toast.success("Заявка создана и отправлена менеджеру!");
+      router.push("/dashboard");
     } catch (error: any) {
-      if (error.response) {
-        toast.error(
-          `Ошибка создания: ${
-            error.response.data?.message || error.response.statusText
-          }`
-        );
-      } else if (error.request) {
-        toast.error("Ошибка сети: сервер не отвечает.");
-      } else {
-        toast.error(`Ошибка: ${error.message}`);
-      }
+      console.error(error);
+      toast.error(error.message || "Произошла ошибка при создании заявки.");
     }
   };
 

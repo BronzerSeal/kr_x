@@ -19,6 +19,7 @@ import RevisionBlock from "@/components/revisionBlock";
 import ChangeAndModifyBlock from "@/components/changeAndModifyBlock";
 import StandartApprove from "@/components/standartApprove";
 import ControlBlock from "@/components/controlBlock";
+import { convertFilesToUrl } from "@/utils/convertFilesToUrl";
 
 const INITIAL_STATE: RequestDetail = {
   id: 0,
@@ -85,7 +86,7 @@ export default function RequestDetailsPage() {
     setUser(session.user);
     if (id) {
       const res = await getRequestsByRequestID(+id);
-      console.log(res);
+      // console.log(res);
       if (res[0].id) {
         const found = res[0];
 
@@ -134,47 +135,44 @@ export default function RequestDetailsPage() {
   // ФУНКЦИЯ ДЛЯ ОТПРАВКИ ДОКУМЕНТОВ
   const handleDoc = async (
     type: string,
-    files: FileAttachment[],
+    files: FileList,
     shouldReload = true
   ) => {
+    if (!request?.id || !user) return;
+
+    const formData = new FormData();
+    formData.append("request_id", String(request.id));
+    formData.append("user_role", user.role);
+    formData.append("user_id", String(user.id));
+    formData.append("document_type", type);
+    formData.append("action", "update");
+
+    // Добавляем файлы в formData
+    Array.from(files).forEach((file) => formData.append("files", file));
+
     try {
-      const response = await axios.post("/api/documents", {
-        request_id: request?.id,
-        user_role: user.role,
-        user_id: user.id,
-        document_type: type,
-        action: "update",
-        files,
+      const response = await fetch("/api/documents", {
+        method: "POST",
+        body: formData,
       });
+
+      if (!response.ok) {
+        throw new Error(`Ошибка сервера: ${response.status}`);
+      }
 
       if (shouldReload) fetchData();
 
-      return response.data;
+      return await response.json();
     } catch (error: any) {
-      if (error.response) {
-        if (error.response.status === 403) {
-          toast.error("У вас нет прав на загрузку документов.");
-        } else {
-          toast.error(
-            `Ошибка сервера: ${error.response.status} — ${
-              error.response.data?.message || "Неизвестная ошибка"
-            }`
-          );
-        }
-      } else {
-        toast.error("Ошибка сети. Проверьте соединение.");
-      }
       console.error("handleDoc error:", error);
+      toast.error(error.message || "Ошибка сети. Проверьте соединение.");
     }
   };
 
+  // handleUpload теперь просто передает FileList
   const handleUpload = async (type: string, files: FileList) => {
-    const newFiles = await convertFiles(files); // { name, data }
-
-    if (!newFiles.length) return;
-
-    // Отправляем только новые файлы
-    await handleDoc(type, newFiles);
+    if (!files || files.length === 0) return;
+    await handleDoc(type, files);
   };
 
   const handleDelete = async (document_type: string, file_id: number) => {
@@ -371,7 +369,7 @@ export default function RequestDetailsPage() {
     isCreator &&
     request.fulfillment_status === "returned" &&
     !request.report_added;
-  console.log(request);
+  // console.log(request);
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="bg-white shadow-xl rounded-lg p-8 max-w-4xl mx-auto">
