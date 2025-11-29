@@ -2,24 +2,23 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { DollarSign, TrainTrack } from "lucide-react";
 import {
-  RequestData,
   FulfillmentStatus,
   FileAttachment,
+  RequestDetail,
 } from "../../../types/requestsTypes";
 import { useAuthStore } from "@/store/auth.store";
 import { getRequestsByRequestID } from "@/actions/getRequests";
-import { DocumentSection } from "@/components/DocumentSection";
+import { DocumentBlock } from "@/components/DocumentBlock";
 import { convertFiles } from "@/utils/convertFiles";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { Button } from "@heroui/button";
-import { Input } from "@heroui/react";
-
-interface RequestDetail extends RequestData {
-  employee_name: string;
-}
+import { CalendarDate } from "@heroui/react";
+import { documentService } from "@/services/document.service";
+import RevisionBlock from "@/components/revisionBlock";
+import ChangeAndModifyBlock from "@/components/changeAndModifyBlock";
+import StandartApprove from "@/components/standartApprove";
+import ControlBlock from "@/components/controlBlock";
 
 const INITIAL_STATE: RequestDetail = {
   id: 0,
@@ -37,7 +36,7 @@ const INITIAL_STATE: RequestDetail = {
   fulfillment_status: "waiting_dates",
   report_added: false,
   report_text: "",
-  receipt_files: [],
+  receiptFiles: [],
   is_modified: false,
   change_history: [],
   viewed_by_ids: [],
@@ -57,7 +56,7 @@ export default function RequestDetailsPage() {
   const { id } = useParams();
   const [request, setRequest] = useState<RequestDetail | null>(null);
   const [user, setUser] = useState<any>(null);
-  const { session, status } = useAuthStore();
+  const { session } = useAuthStore();
 
   // Состояния для Отчета
   const [reportText, setReportText] = useState("");
@@ -68,8 +67,8 @@ export default function RequestDetailsPage() {
 
   // Состояния для формы редактирования (Менеджер/Финансист)
   const [editCost, setEditCost] = useState(0);
-  const [editStart, setEditStart] = useState<Date>();
-  const [editEnd, setEditEnd] = useState<Date>();
+  const [editStart, setEditStart] = useState<CalendarDate>();
+  const [editEnd, setEditEnd] = useState<CalendarDate>();
 
   // Состояния для формы доработки (Сотрудник)
   const [empEditDest, setEmpEditDest] = useState("");
@@ -109,21 +108,21 @@ export default function RequestDetailsPage() {
 
         if (!session.user) return;
         // Mark seen: Отметка о просмотре для снятия колокольчика
-        if (
-          found.is_modified &&
-          found.last_modified_actor_id !== session.user.id &&
-          !found.viewedBy.includes(session.user.id)
-        ) {
-          fetch("/api/requests", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "mark_seen",
-              request_id: found.id,
-              user_id: session?.user?.id, // <--- здесь
-            }),
-          });
-        }
+        // if (
+        //   found.is_modified &&
+        //   found.last_modified_actor_id !== session.user.id &&
+        //   !found.viewedBy.includes(session.user.id)
+        // ) {
+        //   fetch("/api/requests", {
+        //     method: "POST",
+        //     headers: { "Content-Type": "application/json" },
+        //     body: JSON.stringify({
+        //       action: "mark_seen",
+        //       request_id: found.id,
+        //       user_id: session?.user?.id, // <--- здесь
+        //     }),
+        //   });
+        // }
       } else router.replace("/dashboard");
     }
   };
@@ -139,15 +138,6 @@ export default function RequestDetailsPage() {
     shouldReload = true
   ) => {
     try {
-      console.log({
-        request_id: request?.id,
-        user_role: user.role,
-        user_id: user.id,
-        document_type: type,
-        action: "update",
-        files,
-      });
-      console.log("HANDLE DOC");
       const response = await axios.post("/api/documents", {
         request_id: request?.id,
         user_role: user.role,
@@ -190,16 +180,12 @@ export default function RequestDetailsPage() {
   const handleDelete = async (document_type: string, file_id: number) => {
     if (!request?.id) return;
 
-    await fetch("/api/documents", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        file_id,
-        document_type,
-        request_id: request.id,
-        user_id: user.id,
-      }),
-    });
+    await documentService.handleDelete(
+      document_type,
+      file_id,
+      request.id,
+      user.id
+    );
 
     fetchData();
   };
@@ -285,6 +271,7 @@ export default function RequestDetailsPage() {
         resubmit_end_date: empEditEnd,
       });
 
+      toast.success("успешная доработка");
       router.push("/dashboard");
     } catch (error) {
       console.error("Ошибка при переотправке заявки:", error);
@@ -314,12 +301,10 @@ export default function RequestDetailsPage() {
   // ACTION: Отправка/Переотправка отчета (Сотрудник)
   const handleReportSubmit = async () => {
     try {
-      // 1️⃣ Проверка текста отчета
       if (!reportText?.trim()) {
-        alert("Пожалуйста, заполните текст отчета.");
+        toast.error("Пожалуйста, заполните текст отчета.");
         return;
       }
-
       // 2️⃣ Подтверждение
       const isConfirmed = confirm("Отправить отчет на проверку?");
       if (!isConfirmed) return;
@@ -428,224 +413,55 @@ export default function RequestDetailsPage() {
           </div>
         )}
 
-        <h2 className="text-xl font-bold text-gray-800 mb-3">Документы</h2>
-        <div className="grid md:grid-cols-2 gap-4 mb-6">
-          <DocumentSection
-            title="Паспортные данные"
-            files={request.passportPhotos}
-            type="passport"
-            canEdit={isCreator}
-            handleUpload={handleUpload}
-            handleDelete={handleDelete}
-          />
-          <DocumentSection
-            title="Билеты и маршрут"
-            files={request.travelTickets}
-            type="travel"
-            canEdit={isTC}
-            handleUpload={handleUpload}
-            handleDelete={handleDelete}
-          />
-          <DocumentSection
-            title="Бронирование отеля"
-            files={request.hotelBookings}
-            type="hotel"
-            canEdit={isTC}
-            handleUpload={handleUpload}
-            handleDelete={handleDelete}
-          />
-          <DocumentSection
-            title="Чеки и расходы (Отчет)"
-            files={request.receiptFiles}
-            type="receipts"
-            canEdit={canEditReport}
-            handleUpload={handleUpload}
-            handleDelete={handleDelete}
-          />
-        </div>
+        <DocumentBlock
+          request={request}
+          handleUpload={handleUpload}
+          handleDelete={handleDelete}
+          isTC={isTC}
+          isCreator={isCreator}
+          canEditReport={canEditReport}
+        />
 
         {/* БЛОК ДОРАБОТКИ (Сотрудник) */}
         {isCreator && request.status === "created" && (
-          <div className="mb-6 p-4 bg-gray-50 border border-gray-300 rounded-lg shadow-sm">
-            <h3 className="font-bold text-orange-800 mb-3">
-              🛠️ Доработка заявки
-            </h3>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <Input
-                color="warning"
-                label="Направление"
-                placeholder="Направление"
-                startContent={<TrainTrack />}
-                value={empEditDest}
-                onChange={(e) => setEmpEditDest(e.target.value)}
-              />
-              <Input
-                // type="number"
-                placeholder="Бюджет"
-                startContent={<DollarSign />}
-                label="Бюджет"
-                color="warning"
-                value={empEditCost}
-                onChange={(e) => setEmpEditCost(Number(e.target.value))}
-              />
-            </div>
-            <Button
-              onPress={handleResubmit}
-              // className="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-700 transition"
-              className="font-semibold"
-              color="warning"
-              variant="shadow"
-              radius="sm"
-            >
-              Повторно отправить на согласование
-            </Button>
-          </div>
+          <RevisionBlock
+            empEditCost={empEditCost}
+            empEditDest={empEditDest}
+            setEmpEditCost={setEmpEditCost}
+            setEmpEditDest={setEmpEditDest}
+            handleResubmit={handleResubmit}
+          />
         )}
 
         {/* БЛОК ИЗМЕНЕНИЯ И ОДОБРЕНИЯ (Менеджер/Финансист) */}
         {canModify && (
-          <div className="mb-6 p-4 bg-gray-50 border border-[#ffffffa6] rounded-lg shadow-sm">
-            <h3 className="font-bold text-gray-800 mb-3">
-              ⚙️ Корректировка и Согласование
-            </h3>
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <Input
-                size="lg"
-                radius="sm"
-                type="number"
-                label="Бюджет (₽)"
-                placeholder="Бюджет (₽)"
-                value={editCost}
-                onChange={(e) => setEditCost(Number(e.target.value))}
-              />
-              {isManager && (
-                <Input
-                  size="lg"
-                  radius="sm"
-                  type="date"
-                  label="Начало"
-                  placeholder="Начало"
-                  value={editStart ? editStart.toISOString().split("T")[0] : ""}
-                  onChange={(e) => setEditStart(new Date(e.target.value))}
-                />
-              )}
-              {isManager && (
-                <Input
-                  size="lg"
-                  radius="sm"
-                  // className="border p-2 rounded"
-                  type="date"
-                  label="Конец"
-                  placeholder="Конец"
-                  value={editEnd ? editEnd.toISOString().split("T")[0] : ""}
-                  onChange={(e) => setEditEnd(new Date(e.target.value))}
-                />
-              )}
-            </div>
-            <div className="flex space-x-3">
-              <Button
-                onPress={handleModify}
-                color="primary"
-                size="lg"
-                variant="shadow"
-                className="bg-sky-600 text-white px-4 py-2 rounded-lg font-semibold "
-              >
-                Изменить и Одобрить
-              </Button>
-              <Button
-                onPress={() => handleAction("approved")}
-                color="success"
-                size="lg"
-                variant="shadow"
-                className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold "
-              >
-                Одобрить без изменений
-              </Button>
-              <Button
-                onPress={() => handleAction("rejected")}
-                color="danger"
-                size="lg"
-                variant="shadow"
-                className=" text-white px-4 py-2 rounded-lg font-semibold "
-              >
-                Отклонить
-              </Button>
-            </div>
-          </div>
+          <ChangeAndModifyBlock
+            editCost={editCost}
+            setEditCost={setEditCost}
+            isManager={isManager}
+            editStart={editStart}
+            setEditStart={setEditStart}
+            editEnd={editEnd}
+            setEditEnd={setEditEnd}
+            handleModify={handleModify}
+            handleAction={handleAction}
+          />
         )}
 
         {/* БЛОК СТАНДАРТНОГО ОДОБРЕНИЯ */}
-        {canApprove && (
-          <div className="mb-6">
-            <Button
-              size="lg"
-              radius="sm"
-              variant="shadow"
-              onPress={() => handleAction("approved")}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold  mr-3"
-            >
-              Одобрить
-            </Button>
-            <Button
-              size="lg"
-              radius="sm"
-              onPress={() => handleAction("rejected")}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition"
-            >
-              Отклонить
-            </Button>
-          </div>
-        )}
+        {canApprove && <StandartApprove handleAction={handleAction} />}
 
         {/* БЛОК УПРАВЛЕНИЯ ВЫПОЛНЕНИЕМ (Сотрудник) */}
         {isCreator && request.status === "awaiting_employee_action" && (
-          <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg shadow-sm">
-            <h3 className="font-bold text-purple-800 mb-3">
-              ✈️ Управление выполнением
-            </h3>
-            <div className="flex items-center mb-4">
-              <span className="mr-3 text-sm font-medium">Статус:</span>
-              <select
-                value={fulfillmentStatus}
-                onChange={(e) =>
-                  handleFulfillment(e.target.value as FulfillmentStatus)
-                }
-                className="border p-2 rounded"
-              >
-                <option value="waiting_dates">Ожидает дат/документов</option>
-                <option value="in_progress">В поездке</option>
-                <option value="returned">Вернулся</option>
-              </select>
-            </div>
-
-            {(fulfillmentStatus === "returned" || !request.report_added) && (
-              <div className="mt-4 border-t pt-4">
-                <h4 className="font-semibold mb-2">Отчет о выполнении</h4>
-                <textarea
-                  className="w-full border p-2  rounded mb-2 h-32"
-                  placeholder="Детальный отчет о поездке..."
-                  value={reportText}
-                  onChange={(e) => setReportText(e.target.value)}
-                />
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Приложить новые чеки/файлы (добавятся к текущим):
-                </label>
-                <input
-                  type="file"
-                  multiple
-                  onChange={(e) => setSelectedReportFiles(e.target.files)}
-                  className="text-sm w-full file:py-1 mb-3"
-                />
-
-                <button
-                  onClick={handleReportSubmit}
-                  className="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition"
-                >
-                  Отправить Отчет на проверку
-                </button>
-              </div>
-            )}
-          </div>
+          <ControlBlock
+            fulfillmentStatus={fulfillmentStatus}
+            handleFulfillment={handleFulfillment}
+            requestReport={request.report_added}
+            reportText={reportText}
+            setReportText={setReportText}
+            setSelectedReportFiles={selectedReportFiles}
+            handleReportSubmit={handleReportSubmit}
+          />
         )}
 
         {/* БЛОК ПРОСМОТРА ОТЧЕТА */}

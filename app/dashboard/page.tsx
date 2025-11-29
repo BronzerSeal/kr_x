@@ -2,19 +2,17 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { RequestData } from "../../types/requestsTypes";
 import { useAuthStore } from "@/store/auth.store";
 import { getRequests } from "@/actions/getRequests";
 import { RequestCard } from "@/components/RequestCard";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@heroui/button";
-import { Divider } from "@heroui/react";
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("my_requests");
   const [requests, setRequests] = useState<any>([]);
-  // const { session, status, setAuthState } = useAuthStore();
+
   const { setAuthState } = useAuthStore();
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -40,10 +38,8 @@ export default function Dashboard() {
 
   const getFilteredRequests = (tab: string) => {
     if (!user) return [];
-    console.log(requests);
     return requests.filter((req) => {
       const isCreator = req.employee_id === user.id;
-      // console.log("isCreator: ", isCreator);
 
       // Заявка, в которой согласующий участвовал
       const isParticipated = req.approvals.some(
@@ -88,9 +84,6 @@ export default function Dashboard() {
 
   // В зависимости от роли, устанавливаем вкладки
   const isApproverRole = user && user.role !== "employee";
-  const activeRequestsKey = isApproverRole
-    ? "all_active_by_role"
-    : "my_requests";
   if (isApproverRole && activeTab === "my_requests")
     setActiveTab("all_active_by_role");
 
@@ -120,7 +113,6 @@ export default function Dashboard() {
                 // Выход из next-auth
                 await signOut({ redirect: true, callbackUrl: "/login" });
               }}
-              // className="text-red-600 border px-3 py-1 rounded hover:bg-red-50 transition"
               className="h-[37px]"
               color="danger"
               variant="shadow"
@@ -181,7 +173,6 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {displayRequests.map((req) => {
-            // console.log(req);
             return <RequestCard key={req.id} request={req} userId={user.id} />;
           })}
           {displayRequests.length === 0 && (

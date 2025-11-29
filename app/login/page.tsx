@@ -6,15 +6,18 @@ import { useAuthStore } from "@/store/auth.store";
 import { Button } from "@heroui/button";
 import { Input } from "@heroui/react";
 import { toast } from "react-toastify";
-// import { useSession } from "next-auth/react";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+  const [isVisible, setIsVisible] = useState(false);
+  const toggleVisibility = () => setIsVisible(!isVisible);
+
   const router = useRouter();
-  const { status, isAuth, session } = useAuthStore();
+  const { isAuth } = useAuthStore();
 
   // Проверяем, вошел ли пользователь, сразу перенаправляем на Dashboard
   useEffect(() => {
@@ -63,7 +66,7 @@ export default function LoginPage() {
             required
           />
           <Input
-            type="password"
+            type={isVisible ? "text" : "password"}
             label="password"
             variant="bordered"
             value={formData.password}
@@ -71,6 +74,16 @@ export default function LoginPage() {
               setFormData({ ...formData, password: e.target.value })
             }
             required
+            endContent={
+              <button
+                aria-label="toggle password visibility"
+                className="focus:outline-solid outline-transparent"
+                type="button"
+                onClick={toggleVisibility}
+              >
+                {isVisible ? <Eye color="gray" /> : <EyeOff color="gray" />}
+              </button>
+            }
           />
           <Button
             type="submit"

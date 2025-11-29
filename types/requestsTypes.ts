@@ -65,3 +65,7 @@ export interface RequestData {
   last_modified_actor_id?: number;
   viewed_by_ids: number[];
 }
+
+export interface RequestDetail extends RequestData {
+  employee_name: string;
+}

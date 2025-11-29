@@ -14,7 +14,6 @@ export const RequestCard = ({
   let statusColor: ColorVariant = "danger";
   let statusText = "";
 
-  console.log(request);
   // Определяем статус и цвет
   if (request.status === "rejected") {
     statusColor = "danger";

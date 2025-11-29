@@ -3,47 +3,23 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import axios from "axios";
 import { toast } from "react-toastify";
-import { Button, DatePicker, Input, Textarea } from "@heroui/react";
+import { Button, DatePicker, DateValue, Input, Textarea } from "@heroui/react";
+import { convertFilesToBase64 } from "@/utils/convertFilesToBase64";
+import { newRequestService } from "@/services/newRequest.service";
+import {  getLocalTimeZone, today } from "@internationalized/date";
 
 interface FileAttachment {
   name: string;
   data: string;
 }
 
-const convertFilesToBase64 = (
-  files: FileList | null
-): Promise<FileAttachment[]> => {
-  return new Promise((resolve) => {
-    if (!files || files.length === 0) return resolve([]);
-    const filePromises = Array.from(files).map((file) => {
-      return new Promise<FileAttachment>((res) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () =>
-          res({ name: file.name, data: reader.result as string });
-        reader.onerror = () =>
-          res({ name: file.name, data: "Error reading file" });
-      });
-    });
-    Promise.all(filePromises).then(resolve);
-  });
-};
-
-// Функция для преобразования объекта gregory в Date
-const parseHeroDate = (d: any): Date | null => {
-  if (!d) return null;
-  const { year, month, day } = d; // month начинается с 1
-  return new Date(year, month - 1, day);
-};
-
 export default function NewRequestPage() {
   const router = useRouter();
   const [destination, setDestination] = useState("");
   const [purpose, setPurpose] = useState("");
-  const [startDate, setStartDate] = useState<Date | null>();
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  const [startDate, setStartDate] = useState<DateValue | null>();
+  const [endDate, setEndDate] = useState<DateValue | null>(null);
   const [costEstimate, setCostEstimate] = useState<number>(0);
   const [passportFiles, setPassportFiles] = useState<FileList | null>(null);
 
@@ -53,6 +29,7 @@ export default function NewRequestPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return alert("Войдите в систему");
+    if (!user.id || !startDate || !endDate) return;
 
     let passportPayload: FileAttachment[] = [];
     if (passportFiles) {
@@ -60,20 +37,15 @@ export default function NewRequestPage() {
     }
 
     try {
-      console.log({
-        start_date: startDate ? parseHeroDate(startDate)?.toISOString() : null,
-        end_date: endDate ? parseHeroDate(endDate)?.toISOString() : null,
-      });
-      const res = await axios.post("/api/requests", {
-        employee_id: user.id,
+      const res = await newRequestService.createRequest({
+        userId: user.id,
         destination,
         purpose,
-        start_date: startDate ? parseHeroDate(startDate)?.toISOString() : null,
-        end_date: endDate ? parseHeroDate(endDate)?.toISOString() : null,
-        cost_estimate: costEstimate,
-        passport_photos: passportPayload,
+        startDate,
+        endDate,
+        costEstimate,
+        passportPayload,
       });
-      console.log(res);
 
       if (res.status === 200 || res.status === 201) {
         toast.success("Заявка создана и отправлена менеджеру!");
@@ -83,18 +55,15 @@ export default function NewRequestPage() {
       }
     } catch (error: any) {
       if (error.response) {
-        // Сервер вернул ответ с ошибкой
-        alert(
+        toast.error(
           `Ошибка создания: ${
             error.response.data?.message || error.response.statusText
           }`
         );
       } else if (error.request) {
-        // Запрос был отправлен, но ответа не получено
-        alert("Ошибка сети: сервер не отвечает.");
+        toast.error("Ошибка сети: сервер не отвечает.");
       } else {
-        // Другая ошибка
-        alert(`Ошибка: ${error.message}`);
+        toast.error(`Ошибка: ${error.message}`);
       }
     }
   };
@@ -141,12 +110,10 @@ export default function NewRequestPage() {
               </label>
               <DatePicker
                 value={startDate}
+                minValue={today(getLocalTimeZone())}
                 onChange={setStartDate}
-                placeholder="Выберите дату"
                 size="lg"
                 radius="sm"
-                // className="w-full border p-3 rounded-lg"
-                required
               />
             </div>
             <div>
@@ -154,12 +121,12 @@ export default function NewRequestPage() {
                 Дата окончания
               </label>
               <DatePicker
-                type="date"
-                size="lg"
-                radius="sm"
                 value={endDate}
                 onChange={setEndDate}
-                required
+                minValue={startDate || today(getLocalTimeZone())}
+                maxValue={startDate ? startDate.add({ months: 1 }) : undefined}
+                size="lg"
+                radius="sm"
               />
             </div>
           </div>
