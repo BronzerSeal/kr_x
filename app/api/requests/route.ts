@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       // Загружаем файл в Vercel Blob
       const blob = await put(fileName, file, {
         access: "public",
-        addRandomSuffix: true, // добавляет случайный суффикс, чтобы не было конфликтов
+        addRandomSuffix: true,
       });
 
       uploadedFiles.push({ name: fileName, url: blob.url });
