@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/utils/prisma";
 import { put } from "@vercel/blob"; // npm install @vercel/blob
 import { del } from "@vercel/blob";
-export const config = { api: { bodyParser: false } };
 
 export async function POST(req: NextRequest) {
   try {
