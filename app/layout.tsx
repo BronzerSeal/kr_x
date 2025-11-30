@@ -5,6 +5,7 @@ import "./globals.css";
 import { SessionProvider } from "next-auth/react";
 import { ToastContainer } from "react-toastify";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata = {
   title: "SkyWay Travel Portal",
@@ -26,6 +27,7 @@ export default async function RootLayout({
         </SessionProvider>
         <ToastContainer />
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
