@@ -24,17 +24,6 @@ const ChangeAndModifyBlock: FC<IProps> = ({
   handleModify,
   handleAction,
 }) => {
-  console.log({
-    editCost,
-    setEditCost,
-    isManager,
-    editStart,
-    setEditStart,
-    editEnd,
-    setEditEnd,
-    handleModify,
-    handleAction,
-  });
   return (
     <div className="mb-6 p-4 bg-gray-50 border border-[#ffffffa6] rounded-lg shadow-sm">
       <h3 className="font-bold text-gray-800 mb-3">

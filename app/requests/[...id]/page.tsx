@@ -19,7 +19,7 @@ import RevisionBlock from "@/components/revisionBlock";
 import ChangeAndModifyBlock from "@/components/changeAndModifyBlock";
 import StandartApprove from "@/components/standartApprove";
 import ControlBlock from "@/components/controlBlock";
-import { convertFilesToUrl } from "@/utils/convertFilesToUrl";
+import { formatDate } from "@/utils/formatDate";
 
 const INITIAL_STATE: RequestDetail = {
   id: 0,
@@ -369,7 +369,7 @@ export default function RequestDetailsPage() {
     isCreator &&
     request.fulfillment_status === "returned" &&
     !request.report_added;
-  // console.log(request);
+  console.log(request);
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="bg-white shadow-xl rounded-lg p-8 max-w-4xl mx-auto">
@@ -390,8 +390,11 @@ export default function RequestDetailsPage() {
               ? "AWAITING_T-C"
               : request.status.toUpperCase()}
           </p>
-          <span className="text-sm text-gray-500">
-            {FULFILLMENT_LABELS[request.fulfillment_status]}
+          <span className=" text-sm md:text-xl text-gray-500">
+            {/* {FULFILLMENT_LABELS[request.fulfillment_status]} */}
+            {`${formatDate(request.start_date)}-${formatDate(
+              request.end_date
+            )}`}
           </span>
         </div>
 

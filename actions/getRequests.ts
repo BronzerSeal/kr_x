@@ -25,6 +25,7 @@ export async function getRequests(userId: string, userRole: string) {
       OR: [
         { employee_id: userId }, // мои заявки
         { current_approver_role: userRole }, // ожидают меня
+        { approvals: { some: { approver_id: userId } } },
       ],
     },
     include: {

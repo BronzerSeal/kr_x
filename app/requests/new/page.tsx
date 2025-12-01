@@ -5,15 +5,8 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { toast } from "react-toastify";
 import { Button, DatePicker, DateValue, Input, Textarea } from "@heroui/react";
-import { convertFilesToBase64 } from "@/utils/convertFilesToBase64";
-import { newRequestService } from "@/services/newRequest.service";
 import { getLocalTimeZone, today } from "@internationalized/date";
 import { parseHeroDate } from "@/utils/parseHeroDate";
-
-interface FileAttachment {
-  name: string;
-  data: string;
-}
 
 export default function NewRequestPage() {
   const router = useRouter();

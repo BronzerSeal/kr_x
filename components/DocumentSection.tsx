@@ -49,7 +49,7 @@ export const DocumentSection = ({
               download={f.file_name}
               className="text-blue-600 truncate max-w-[80%]"
             >
-              📄 {f.file_name}
+              📄 {f.file_name.replace(/^\d+-/, "")}
             </a>
             {canEdit && (
               <button

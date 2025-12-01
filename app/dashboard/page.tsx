@@ -39,6 +39,8 @@ export default function Dashboard() {
   const getFilteredRequests = (tab: string) => {
     if (!user) return [];
     return requests.filter((req) => {
+      console.log("REG: ", req);
+      console.log("USER: ", user);
       const isCreator = req.employee_id === user.id;
 
       // Заявка, в которой согласующий участвовал
@@ -89,6 +91,7 @@ export default function Dashboard() {
 
   const displayRequests = getFilteredRequests(activeTab);
   console.log(displayRequests);
+  console.log("TAB: ", activeTab);
 
   if (!user || status === "loading")
     return <div className="p-8">Загрузка...</div>;
