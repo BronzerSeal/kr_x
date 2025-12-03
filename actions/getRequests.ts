@@ -2,23 +2,6 @@
 
 import prisma from "@/utils/prisma";
 
-// export async function getRequests(employeeId: string) {
-//   console.log("employeeId:", employeeId);
-//   const response = await prisma.request.findMany({
-//     where: { employee_id: employeeId },
-//     include: {
-//       approvals: true,
-//       changeLogs: true,
-//       viewedBy: true,
-//       passportPhotos: true,
-//       travelTickets: true,
-//       hotelBookings: true,
-//       receiptFiles: true,
-//     },
-//   });
-//   console.log("response", response);
-//   return response;
-// }
 export async function getRequests(userId: string, userRole: string) {
   const response = await prisma.request.findMany({
     where: {
@@ -55,5 +38,20 @@ export async function getRequestsByRequestID(requestId: number) {
     },
   });
   console.log("response", response);
+  return response;
+}
+
+export async function getAllRequests() {
+  const response = await prisma.request.findMany({
+    include: {
+      approvals: true,
+      changeLogs: true,
+      viewedBy: true,
+      passportPhotos: true,
+      travelTickets: true,
+      hotelBookings: true,
+      receiptFiles: true,
+    },
+  });
   return response;
 }

@@ -194,11 +194,13 @@ export default function RequestDetailsPage() {
     if (comment === null) return;
 
     try {
+      console.log("ACTION: ", action);
       await axios.post("/api/approval", {
         request_id: request?.id,
         approver_role: user.role,
         approver_id: user.id,
         action_status: action,
+        approver_email: user.email,
         comment,
       });
 
@@ -232,6 +234,7 @@ export default function RequestDetailsPage() {
           request_id: request?.id,
           approver_role: user.role,
           approver_id: user.id,
+          approver_email: user.email,
           comment,
           new_cost_estimate: editCost,
           new_start_date: editStart,
@@ -322,6 +325,7 @@ export default function RequestDetailsPage() {
       const response = await axios.post("/api/fulfillment", {
         request_id: request?.id,
         user_id: user.id,
+        approver_email: user.email,
         action: "add_report",
         report_text: reportText,
       });
@@ -370,6 +374,7 @@ export default function RequestDetailsPage() {
     request.fulfillment_status === "returned" &&
     !request.report_added;
   console.log(request);
+  console.log("user: ", user);
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="bg-white shadow-xl rounded-lg p-8 max-w-4xl mx-auto">
@@ -516,7 +521,8 @@ export default function RequestDetailsPage() {
                 }`}
               >
                 <span className="font-bold uppercase">{a.action}</span> (
-                {a.approver_role}) {new Date(a.date).toLocaleDateString()}
+                {a.approver_email || a.approver_role}){" "}
+                {new Date(a.date).toLocaleDateString()}
                 {a.comment && (
                   <p className="text-gray-600 italic mt-1">
                     Комментарий: "{a.comment}"

@@ -91,15 +91,16 @@ model Request {
 }
 
 model Approval {
-  id            Int       @id @default(autoincrement())
-  request_id    Int
-  approver_id   String
-  approver_role String
-  action        String
-  comment       String?
-  date          DateTime
-  approver      User     @relation(fields: [approver_id], references: [id])
-  request       Request  @relation(fields: [request_id], references: [id], onDelete: Cascade)
+  id                Int       @id @default(autoincrement())
+  request_id        Int
+  approver_id       String
+  approver_email    String
+  approver_role     String
+  action            String
+  comment           String?
+  date              DateTime
+  approver          User     @relation(fields: [approver_id], references: [id])
+  request           Request  @relation(fields: [request_id], references: [id], onDelete: Cascade)
 
   @@index([approver_id])
 }

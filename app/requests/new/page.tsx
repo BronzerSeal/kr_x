@@ -29,6 +29,7 @@ export default function NewRequestPage() {
     formData.append("employee_id", String(user.id));
     formData.append("destination", destination);
     formData.append("purpose", purpose);
+    formData.append("approver_email", user.email);
     formData.append(
       "start_date",
       startDate ? parseHeroDate(startDate)?.toISOString() : ""

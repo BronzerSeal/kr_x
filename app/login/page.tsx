@@ -51,7 +51,7 @@ export default function LoginPage() {
         </h1>
 
         <p className="text-center text-sm text-gray-500 mb-4">
-          Демо-логины: anna, ivan, olga, petr (введите часть почты)
+          Демо-логины: anna, ivan, olga, petr, stepan (+ gmail.com)
         </p>
 
         <form onSubmit={handleLogin} className="space-y-4">

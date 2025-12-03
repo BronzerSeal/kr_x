@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       request_id,
+      approver_email,
       approver_role,
       approver_id,
       action_status,
@@ -97,6 +98,7 @@ export async function POST(req: NextRequest) {
             create: {
               approver_id,
               approver_role: "employee",
+              approver_email: approver_email,
               action: "resubmitted",
               comment: comment || "Повторная отправка после доработки",
               date: today,
@@ -180,6 +182,7 @@ export async function POST(req: NextRequest) {
               approver_id,
               approver_role,
               action: "modified",
+              approver_email: approver_email,
               comment: comment || "Внесены правки",
               date: today,
             },
@@ -216,6 +219,7 @@ export async function POST(req: NextRequest) {
               approver_id,
               approver_role,
               action: action_status,
+              approver_email: approver_email,
               comment,
               date: today,
             },

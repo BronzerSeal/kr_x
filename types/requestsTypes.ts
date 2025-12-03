@@ -25,6 +25,7 @@ export interface FileAttachment {
 
 export interface Approval {
   approver_role: UserRole | "employee";
+  approver_email: string;
   action: "approved" | "rejected" | "modified" | "resubmitted";
   comment?: string;
   date: string;

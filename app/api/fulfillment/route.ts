@@ -4,8 +4,14 @@ import prisma from "@/utils/prisma";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { request_id, user_id, fulfillment_status, action, report_text } =
-      body;
+    const {
+      request_id,
+      user_id,
+      fulfillment_status,
+      action,
+      report_text,
+      approver_email,
+    } = body;
 
     const request = await prisma.request.findUnique({
       where: { id: Number(request_id) },
@@ -88,6 +94,7 @@ export async function POST(req: Request) {
           action: "resubmitted",
           comment: "Отчет отправлен.",
           date: today,
+          approver_email: approver_email,
         },
       });
 

@@ -19,6 +19,7 @@ export async function POST(req: NextRequest) {
     const start_date = formData.get("start_date") as string;
     const end_date = formData.get("end_date") as string;
     const cost_estimate = formData.get("cost_estimate") as string;
+    const approver_email = formData.get("approver_email") as string;
 
     if (!employee_id || !destination || !start_date || !end_date) {
       return NextResponse.json(
@@ -72,6 +73,7 @@ export async function POST(req: NextRequest) {
             {
               approver_id: String(employee_id),
               approver_role: "employee",
+              approver_email: approver_email,
               action: "resubmitted",
               comment: "Создана заявка.",
               date: new Date(),

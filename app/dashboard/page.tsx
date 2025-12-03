@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/auth.store";
-import { getRequests } from "@/actions/getRequests";
+import { getAllRequests, getRequests } from "@/actions/getRequests";
 import { RequestCard } from "@/components/RequestCard";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@heroui/button";
@@ -19,9 +19,18 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     if (!session?.user?.id) return;
-    const resp = await getRequests(session?.user?.id, session.user?.role);
 
-    setRequests(resp);
+    if (session.user.role === "security") {
+      const resp = await getAllRequests();
+      console.log(resp);
+      setRequests(resp);
+      console.log(requests);
+    } else {
+      const resp = await getRequests(session?.user?.id, session.user?.role);
+      console.log(resp);
+      setRequests(resp);
+      console.log(requests);
+    }
   };
 
   useEffect(() => {
@@ -31,41 +40,62 @@ export default function Dashboard() {
     }
     setUser(session.user);
 
-    if (session?.user?.role !== "employee") setActiveTab("awaiting_approval");
+    if (session?.user?.role === "security") setActiveTab("all_active_by_role");
+    else if (session?.user?.role !== "employee")
+      setActiveTab("awaiting_approval");
 
     fetchData();
   }, [router, session]);
 
   const getFilteredRequests = (tab: string) => {
     if (!user) return [];
-    return requests.filter((req) => {
-      console.log("REG: ", req);
-      console.log("USER: ", user);
-      const isCreator = req.employee_id === user.id;
 
-      // Заявка, в которой согласующий участвовал
-      const isParticipated = req.approvals.some(
+    return requests.filter((req) => {
+      const isCreator = req.employee_id === user.id;
+      const isParticipated = req.approvals?.some(
         (a) => a.approver_role === user.role
       );
-      // console.log("isParticipated: ", isParticipated);
 
-      // Мои заявки: Те, что я создал
+      const isSecurity = user.role === "security";
+
+      // 📌 Если SECURITY — особые правила:
+      if (isSecurity) {
+        if (tab === "my_requests") {
+          return false; // У безопасника нет "моих заявок"
+        }
+
+        if (tab === "awaiting_approval") {
+          return req.status !== "completed" && req.status !== "rejected";
+        }
+
+        if (tab === "all_active_by_role") {
+          return req.status !== "completed" && req.status !== "rejected";
+        }
+
+        if (tab === "archive") {
+          return req.status === "completed" || req.status === "rejected";
+        }
+
+        return true;
+      }
+
+      // ==============================
+      // ✨ ЛОГИКА ДЛЯ ДРУГИХ РОЛЕЙ
+      // ==============================
+
       if (tab === "my_requests") {
         return (
           isCreator && req.status !== "completed" && req.status !== "rejected"
         );
       }
 
-      // Ожидают меня: Те, где я текущий согласующий
       if (tab === "awaiting_approval") {
         return (
           req.current_approver_role === user.role && req.status !== "completed"
         );
       }
 
-      // Все, что касается моей работы (для согласующих)
       if (tab === "all_active_by_role") {
-        // Отображаем все, что ожидает меня И все, что я когда-либо одобрял/отклонял/модифицировал
         return (
           (isParticipated || isCreator) &&
           req.status !== "completed" &&
@@ -73,13 +103,13 @@ export default function Dashboard() {
         );
       }
 
-      // Архив: Завершенные или отклоненные
       if (tab === "archive") {
         return (
           (isCreator || isParticipated) &&
           (req.status === "completed" || req.status === "rejected")
         );
       }
+
       return false;
     });
   };
@@ -91,7 +121,7 @@ export default function Dashboard() {
 
   const displayRequests = getFilteredRequests(activeTab);
   console.log(displayRequests);
-  console.log("TAB: ", activeTab);
+  // console.log("TAB: ", activeTab);
 
   if (!user || status === "loading")
     return <div className="p-8">Загрузка...</div>;
@@ -140,16 +170,19 @@ export default function Dashboard() {
           )}
           {isApproverRole && (
             <>
-              <button
-                onClick={() => setActiveTab("awaiting_approval")}
-                className={`pb-2 ${
-                  activeTab === "awaiting_approval"
-                    ? "border-b-2 border-sky-500 font-semibold"
-                    : "text-gray-600"
-                }`}
-              >
-                Ожидают меня ({getFilteredRequests("awaiting_approval").length})
-              </button>
+              {session?.user?.role !== "security" && (
+                <button
+                  onClick={() => setActiveTab("awaiting_approval")}
+                  className={`pb-2 ${
+                    activeTab === "awaiting_approval"
+                      ? "border-b-2 border-sky-500 font-semibold"
+                      : "text-gray-600"
+                  }`}
+                >
+                  Ожидают меня (
+                  {getFilteredRequests("awaiting_approval").length})
+                </button>
+              )}
               <button
                 onClick={() => setActiveTab("all_active_by_role")}
                 className={`pb-2 ${
