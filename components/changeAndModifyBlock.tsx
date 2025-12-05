@@ -1,5 +1,7 @@
-import { Button, CalendarDate, Input } from "@heroui/react";
+import { Button, CalendarDate, DatePicker, Input } from "@heroui/react";
 import { Dispatch, FC, SetStateAction } from "react";
+import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
+import { convertDateToCalendarDate } from "@/utils/convertDateToCalendarDate";
 
 interface IProps {
   editCost: number;
@@ -24,6 +26,7 @@ const ChangeAndModifyBlock: FC<IProps> = ({
   handleModify,
   handleAction,
 }) => {
+  console.log(editStart);
   return (
     <div className="mb-6 p-4 bg-gray-50 border border-[#ffffffa6] rounded-lg shadow-sm">
       <h3 className="font-bold text-gray-800 mb-3">
@@ -36,29 +39,29 @@ const ChangeAndModifyBlock: FC<IProps> = ({
           type="number"
           label="Бюджет (₽)"
           placeholder="Бюджет (₽)"
+          max={200000}
           value={editCost}
           onChange={(e) => setEditCost(Number(e.target.value))}
         />
         {isManager && (
-          <Input
+          <DatePicker
             size="lg"
             radius="sm"
-            type="date"
             label="Начало"
-            placeholder="Начало"
-            value={editStart ? editStart.toISOString().split("T")[0] : ""}
-            onChange={(e) => setEditStart(new Date(e.target.value))}
+            value={editStart}
+            onChange={setEditStart}
+            minValue={today(getLocalTimeZone())}
           />
         )}
         {isManager && (
-          <Input
+          <DatePicker
             size="lg"
             radius="sm"
-            type="date"
             label="Конец"
-            placeholder="Конец"
-            value={editEnd ? editEnd.toISOString().split("T")[0] : ""}
-            onChange={(e) => setEditEnd(new Date(e.target.value))}
+            value={editEnd}
+            onChange={setEditEnd}
+            minValue={editStart || today(getLocalTimeZone())}
+            maxValue={editStart ? editStart.add({ months: 1 }) : undefined}
           />
         )}
       </div>
@@ -77,7 +80,7 @@ const ChangeAndModifyBlock: FC<IProps> = ({
           color="success"
           size="lg"
           variant="shadow"
-          className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold "
+          className="bg-green-600 text-white px-4 py-2 rounded-lg   font-semibold "
         >
           Одобрить без изменений
         </Button>

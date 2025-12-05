@@ -15,6 +15,8 @@ import ChangeAndModifyBlock from "@/components/changeAndModifyBlock";
 import StandartApprove from "@/components/standartApprove";
 import ControlBlock from "@/components/controlBlock";
 import { formatDate } from "@/utils/formatDate";
+import { convertDateToCalendarDate } from "@/utils/convertDateToCalendarDate";
+import { parseHeroDate } from "@/utils/parseHeroDate";
 
 const INITIAL_STATE: RequestDetail = {
   id: 0,
@@ -94,8 +96,8 @@ export default function RequestDetailsPage() {
         setFulfillmentStatus(found.fulfillment_status);
 
         setEditCost(found.cost_estimate);
-        setEditStart(found.start_date);
-        setEditEnd(found.end_date);
+        setEditStart(convertDateToCalendarDate(found.start_date));
+        setEditEnd(convertDateToCalendarDate(found.end_date));
         setEmpEditDest(found.destination);
         setEmpEditCost(found.cost_estimate);
         setEmpEditPurpose(found.purpose);
@@ -233,8 +235,10 @@ export default function RequestDetailsPage() {
           approver_email: user.email,
           comment,
           new_cost_estimate: editCost,
-          new_start_date: editStart,
-          new_end_date: editEnd,
+          new_start_date: editStart
+            ? parseHeroDate(editStart)?.toISOString()
+            : "",
+          new_end_date: editEnd ? parseHeroDate(editEnd)?.toISOString() : "",
         },
         {
           headers: { "Content-Type": "application/json" },
