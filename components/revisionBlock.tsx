@@ -42,7 +42,7 @@ const RevisionBlock = ({
         </div>
         <Button
           onPress={handleResubmit}
-          className="font-semibold"
+          className="font-semibold w-full text-[12px] sm:text-[14px]"
           color="warning"
           variant="shadow"
           radius="sm"
