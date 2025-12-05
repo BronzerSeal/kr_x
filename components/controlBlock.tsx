@@ -7,7 +7,7 @@ interface IProps {
   requestReport: boolean;
   reportText: string;
   setReportText: Dispatch<SetStateAction<string>>;
-  setSelectedReportFiles: FileList | null;
+  setSelectedReportFiles: Dispatch<SetStateAction<FileList | null>>;
   handleReportSubmit: () => void;
 }
 
@@ -55,7 +55,10 @@ const ControlBlock: FC<IProps> = ({
           <input
             type="file"
             multiple
-            onChange={(e) => setSelectedReportFiles(e.target.files)}
+            onChange={(e) => {
+              // console.log(e.target.files);
+              setSelectedReportFiles(e.target.files);
+            }}
             className="text-sm w-full file:py-1 mb-3"
           />
 

@@ -2,15 +2,10 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  FulfillmentStatus,
-  FileAttachment,
-  RequestDetail,
-} from "../../../types/requestsTypes";
+import { FulfillmentStatus, RequestDetail } from "../../../types/requestsTypes";
 import { useAuthStore } from "@/store/auth.store";
 import { getRequestsByRequestID } from "@/actions/getRequests";
 import { DocumentBlock } from "@/components/DocumentBlock";
-import { convertFiles } from "@/utils/convertFiles";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { CalendarDate } from "@heroui/react";
@@ -138,6 +133,7 @@ export default function RequestDetailsPage() {
     files: FileList,
     shouldReload = true
   ) => {
+    console.log("REPORT FILES:", files);
     if (!request?.id || !user) return;
 
     const formData = new FormData();
@@ -310,15 +306,8 @@ export default function RequestDetailsPage() {
       const isConfirmed = confirm("Отправить отчет на проверку?");
       if (!isConfirmed) return;
 
-      // 3️⃣ Готовим файлы
-      let finalReportFiles = request?.receiptFiles || [];
-      if (selectedReportFiles?.length) {
-        const newFiles = await convertFiles(selectedReportFiles);
-        finalReportFiles = [...finalReportFiles, ...newFiles];
-      }
-
       // 4️⃣ Загружаем файлы (не обновляем UI)
-      await handleDoc("receipts", finalReportFiles, false);
+      await handleDoc("receipts", selectedReportFiles, false);
 
       // 5️⃣ Отправляем запрос через Axios
       console.log("LINE 336");
@@ -335,7 +324,7 @@ export default function RequestDetailsPage() {
       // 6️⃣ Обновляем UI
       setRequest(updatedRequest);
       setReportText("");
-      setSelectedReportFiles([]);
+      setSelectedReportFiles(null);
 
       toast.success("Отчет успешно отправлен!");
       router.push("/dashboard");
@@ -374,7 +363,7 @@ export default function RequestDetailsPage() {
     request.fulfillment_status === "returned" &&
     !request.report_added;
   console.log(request);
-  console.log("user: ", user);
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="bg-white shadow-xl rounded-lg p-8 max-w-4xl mx-auto">
@@ -465,7 +454,7 @@ export default function RequestDetailsPage() {
             requestReport={request.report_added}
             reportText={reportText}
             setReportText={setReportText}
-            setSelectedReportFiles={selectedReportFiles}
+            setSelectedReportFiles={setSelectedReportFiles}
             handleReportSubmit={handleReportSubmit}
           />
         )}
