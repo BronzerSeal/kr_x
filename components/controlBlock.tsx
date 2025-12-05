@@ -56,7 +56,6 @@ const ControlBlock: FC<IProps> = ({
             type="file"
             multiple
             onChange={(e) => {
-              // console.log(e.target.files);
               setSelectedReportFiles(e.target.files);
             }}
             className="text-sm w-full file:py-1 mb-3"

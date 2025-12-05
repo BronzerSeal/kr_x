@@ -32,7 +32,7 @@ const ChangeAndModifyBlock: FC<IProps> = ({
       <h3 className="font-bold text-gray-800 mb-3">
         ⚙️ Корректировка и Согласование
       </h3>
-      <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="grid sm:grid-cols-3 gap-3 mb-4">
         <Input
           size="lg"
           radius="sm"
@@ -65,7 +65,7 @@ const ChangeAndModifyBlock: FC<IProps> = ({
           />
         )}
       </div>
-      <div className="flex space-x-3">
+      <div className="flex space-x-3 flex-wrap gap-2 sm:gap-0">
         <Button
           onPress={handleModify}
           color="primary"

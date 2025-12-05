@@ -382,14 +382,14 @@ export default function RequestDetailsPage() {
         <h1 className="text-3xl font-bold text-sky-800 mb-2">
           Заявка №{request.id}: {request.destination}
         </h1>
-        <div className="flex justify-between items-center mb-6 border-b pb-4">
-          <p className="text-xl font-semibold text-orange-600">
+        <div className="flex justify-between items-center mb-6 border-b pb-4 flex-wrap">
+          <p className="text-[17px] sm:text-xl font-semibold text-orange-600">
             Текущий статус:{" "}
             {request.status === "awaiting_hr"
               ? "AWAITING_T-C"
               : request.status.toUpperCase()}
           </p>
-          <span className=" text-sm md:text-xl text-gray-500">
+          <span className=" text-[15px] md:text-xl text-gray-500">
             {/* {FULFILLMENT_LABELS[request.fulfillment_status]} */}
             {`${formatDate(request.start_date)}-${formatDate(
               request.end_date
@@ -480,13 +480,13 @@ export default function RequestDetailsPage() {
               <div className="mt-4 pt-4 border-t flex space-x-3">
                 <button
                   onClick={() => handleAction("approved")}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-700 transition"
+                  className="bg-green-600 text-white px-4 sm:py-2 rounded-lg font-semibold hover:bg-green-700 transition"
                 >
                   Утвердить
                 </button>
                 <button
                   onClick={() => handleAction("rejected")}
-                  className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-700 transition"
+                  className="bg-red-600 text-white px-4 py-1 sm:py-2 rounded-lg font-semibold hover:bg-red-700 transition"
                 >
                   На доработку
                 </button>

@@ -44,8 +44,8 @@ export default function LoginPage() {
     }
   };
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md border border-gray-200">
         <h1 className="text-3xl font-bold text-center text-sky-700 mb-6">
           SkyWay Travel Portal
         </h1>
