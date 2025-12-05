@@ -111,15 +111,13 @@ export default function RequestDetailsPage() {
         //   found.last_modified_actor_id !== session.user.id &&
         //   !found.viewedBy.includes(session.user.id)
         // ) {
-        //   fetch("/api/requests", {
-        //     method: "POST",
-        //     headers: { "Content-Type": "application/json" },
-        //     body: JSON.stringify({
-        //       action: "mark_seen",
-        //       request_id: found.id,
-        //       user_id: session?.user?.id, // <--- здесь
-        //     }),
-        //   });
+        //   const formData = new FormData();
+
+        //   formData.append("action", "mark_seen");
+        //   formData.append("request_id", String(found.id));
+        //   formData.append("user_id", String(session.user.id));
+
+        //   axios.post("/api/requests", formData);
         // }
       } else router.replace("/dashboard");
     }

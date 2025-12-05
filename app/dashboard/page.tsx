@@ -7,6 +7,7 @@ import { getAllRequests, getRequests } from "@/actions/getRequests";
 import { RequestCard } from "@/components/RequestCard";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@heroui/button";
+import { Chip } from "@heroui/react";
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
@@ -221,11 +222,22 @@ export default function Dashboard() {
           )}
         </div>
         {user.role === "employee" && (
-          <Link
-            href="/requests/new"
-            className="fixed bottom-8 right-8 bg-sky-600 text-white p-4 rounded-full shadow-lg text-2xl hover:bg-sky-700 transition"
-          >
-            +
+          <Link href="/requests/new">
+            <Chip
+              as="div"
+              color="primary"
+              variant="shadow"
+              className="
+          fixed bottom-8 right-8
+          shadow-lg
+          cursor-pointer
+          text-xl
+          p-6
+          rounded-full
+        "
+            >
+              +
+            </Chip>
           </Link>
         )}
       </div>

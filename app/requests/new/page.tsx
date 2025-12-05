@@ -64,7 +64,7 @@ export default function NewRequestPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="bg-white shadow p-8 max-w-2xl mx-auto rounded-lg">
+      <div className="bg-white shadow p-5 sm:p-8 max-w-2xl mx-auto rounded-lg">
         <Link href="/dashboard" className="text-sky-600 mb-4 inline-block">
           ← Назад
         </Link>
@@ -133,6 +133,7 @@ export default function NewRequestPage() {
             size="lg"
             radius="sm"
             placeholder="Бюджет"
+            max={200000}
             value={costEstimate || ""}
             onChange={(e) => setCostEstimate(Number(e.target.value))}
             required
