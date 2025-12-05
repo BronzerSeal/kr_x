@@ -259,6 +259,7 @@ export default function RequestDetailsPage() {
       await axios.post("/api/approval", {
         request_id: request?.id,
         approver_role: user.role,
+        approver_email: user.email,
         approver_id: user.id,
         action_type: "resubmit",
         resubmit_destination: empEditDest,
