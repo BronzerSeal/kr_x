@@ -19,6 +19,7 @@ export default function MyModal({
   type,
 }) {
   const [comment, setComment] = useState("");
+  //c
   return (
     <Modal isOpen={isOpen} onOpenChange={onOpenChange} placement="center">
       <ModalContent>
