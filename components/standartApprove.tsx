@@ -20,9 +20,7 @@ const StandartApprove: FC<Props> = ({ handleAction }) => {
         radius="sm"
         variant="shadow"
         onPress={() => {
-          setActionType("approved");
-          onOpen();
-          // handleAction("approved");
+          handleAction("approved");
         }}
         className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold  mr-3"
       >

@@ -484,10 +484,8 @@ export default function RequestDetailsPage() {
               <div className="mt-4 pt-4 border-t flex space-x-3">
                 <button
                   onClick={() => {
-                    setAction("approved");
-                    onOpen();
+                    handleAction("approved");
                   }}
-                  // handleAction("approved")}
                   className="bg-green-600 text-white px-4 sm:py-2 rounded-lg font-semibold hover:bg-green-700 transition"
                 >
                   Утвердить
