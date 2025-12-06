@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const {
       request_id,
+      report,
       approver_email,
       approver_role,
       approver_id,
@@ -237,6 +238,7 @@ export async function POST(req: NextRequest) {
                   create: { user_id: approver_id }, // создаём новую запись для уведомления
                 }
               : undefined,
+          report_added: report && false,
           changeLogs:
             action_status === "rejected"
               ? {

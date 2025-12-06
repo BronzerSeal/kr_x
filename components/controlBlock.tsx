@@ -1,5 +1,8 @@
+"use client";
 import { FulfillmentStatus } from "@/types/requestsTypes";
 import { Dispatch, FC, SetStateAction } from "react";
+import MyModal from "./MyModal";
+import { useDisclosure } from "@heroui/react";
 
 interface IProps {
   fulfillmentStatus: string;
@@ -20,6 +23,7 @@ const ControlBlock: FC<IProps> = ({
   setSelectedReportFiles,
   handleReportSubmit,
 }) => {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   return (
     <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg shadow-sm">
       <h3 className="font-bold text-purple-800 mb-3">
@@ -32,7 +36,7 @@ const ControlBlock: FC<IProps> = ({
           onChange={(e) =>
             handleFulfillment(e.target.value as FulfillmentStatus)
           }
-          className="border p-2 rounded"
+          className="border p-2 rounded w-full sm:w"
         >
           <option value="waiting_dates">Ожидает дат/документов</option>
           <option value="in_progress">В поездке</option>
@@ -62,13 +66,21 @@ const ControlBlock: FC<IProps> = ({
           />
 
           <button
-            onClick={handleReportSubmit}
+            onClick={onOpen}
             className="bg-purple-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-700 transition"
           >
             Отправить Отчет на проверку
           </button>
         </div>
       )}
+      <MyModal
+        title={"Отправить отчет на проверку?"}
+        isOpen={isOpen}
+        subtitle="проверьте всё еще раз"
+        onOpenChange={onOpenChange}
+        onPress={handleReportSubmit}
+        type={"resubmit"}
+      />
     </div>
   );
 };

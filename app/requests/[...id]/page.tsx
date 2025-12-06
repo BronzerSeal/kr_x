@@ -8,7 +8,7 @@ import { getRequestsByRequestID } from "@/actions/getRequests";
 import { DocumentBlock } from "@/components/DocumentBlock";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { CalendarDate } from "@heroui/react";
+import { CalendarDate, useDisclosure } from "@heroui/react";
 import { documentService } from "@/services/document.service";
 import RevisionBlock from "@/components/revisionBlock";
 import ChangeAndModifyBlock from "@/components/changeAndModifyBlock";
@@ -17,6 +17,7 @@ import ControlBlock from "@/components/controlBlock";
 import { formatDate } from "@/utils/formatDate";
 import { convertDateToCalendarDate } from "@/utils/convertDateToCalendarDate";
 import { parseHeroDate } from "@/utils/parseHeroDate";
+import MyModal from "@/components/MyModal";
 
 const INITIAL_STATE: RequestDetail = {
   id: 0,
@@ -55,6 +56,9 @@ export default function RequestDetailsPage() {
   const [request, setRequest] = useState<RequestDetail | null>(null);
   const [user, setUser] = useState<any>(null);
   const { session } = useAuthStore();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [action, setAction] = useState("");
+  const [report, setReport] = useState(false);
 
   // Состояния для Отчета
   const [reportText, setReportText] = useState("");
@@ -185,8 +189,7 @@ export default function RequestDetailsPage() {
   };
 
   // ACTION: Согласование (Approved/Rejected)
-  const handleAction = async (action: string) => {
-    const comment = prompt("Комментарий (необязательно):");
+  const handleAction = async (action: string, comment: string = "") => {
     if (comment === null) return;
 
     try {
@@ -197,6 +200,7 @@ export default function RequestDetailsPage() {
         approver_id: user.id,
         action_status: action,
         approver_email: user.email,
+        report,
         comment,
       });
 
@@ -219,8 +223,7 @@ export default function RequestDetailsPage() {
   };
 
   // ACTION: Изменение и Одобрение (Менеджер/Финансист)
-  const handleModify = async () => {
-    const comment = prompt("Комментарий к изменению:");
+  const handleModify = async (comment: string) => {
     if (comment === null) return;
 
     try {
@@ -245,17 +248,18 @@ export default function RequestDetailsPage() {
       toast.success("Успешное изменение и одобрение заявки");
       router.push("/dashboard");
     } catch (error: any) {
-      toast.error("Ошибка при одобрении/изменении:", error);
-      alert(
-        error.response?.data?.message ||
-          "Произошла ошибка при отправке данных на сервер"
-      );
+      // toast.error("Ошибка при одобрении/изменении:", error);
+      toast.error("Измените хотя бы одно поле");
+      // alert(
+      //   error.response?.data?.message ||
+      //     "Произошла ошибка при отправке данных на сервер"
+      // );
     }
   };
 
   // ACTION: Переотправка (Сотрудник, статус 'created')
   const handleResubmit = async () => {
-    if (!confirm("Повторно отправить заявку?")) return;
+    // if (!confirm("Повторно отправить заявку?")) return;
 
     try {
       await axios.post("/api/approval", {
@@ -305,11 +309,12 @@ export default function RequestDetailsPage() {
         toast.error("Пожалуйста, заполните текст отчета.");
         return;
       }
-      // 2️⃣ Подтверждение
-      const isConfirmed = confirm("Отправить отчет на проверку?");
-      if (!isConfirmed) return;
 
       // 4️⃣ Загружаем файлы (не обновляем UI)
+      if (!selectedReportFiles || selectedReportFiles.length === 0) {
+        toast.error("Пожалуйста, приложите чеки");
+        return;
+      }
       await handleDoc("receipts", selectedReportFiles, false);
 
       // 5️⃣ Отправляем запрос через Axios
@@ -327,6 +332,7 @@ export default function RequestDetailsPage() {
       // 6️⃣ Обновляем UI
       setRequest(updatedRequest);
       setReportText("");
+      setReport(false);
       setSelectedReportFiles(null);
 
       toast.success("Отчет успешно отправлен!");
@@ -477,17 +483,33 @@ export default function RequestDetailsPage() {
             {isAwaitingReportApproval && isFinance && (
               <div className="mt-4 pt-4 border-t flex space-x-3">
                 <button
-                  onClick={() => handleAction("approved")}
+                  onClick={() => {
+                    setAction("approved");
+                    onOpen();
+                  }}
+                  // handleAction("approved")}
                   className="bg-green-600 text-white px-4 sm:py-2 rounded-lg font-semibold hover:bg-green-700 transition"
                 >
                   Утвердить
                 </button>
                 <button
-                  onClick={() => handleAction("rejected")}
+                  onClick={() => {
+                    setAction("rejected");
+                    setReport(true);
+                    onOpen();
+                  }}
+                  // onClick={() => handleAction("rejected")}
                   className="bg-red-600 text-white px-4 py-1 sm:py-2 rounded-lg font-semibold hover:bg-red-700 transition"
                 >
                   На доработку
                 </button>
+                <MyModal
+                  title={action === "approved" ? "уверены?" : "Комментарий"}
+                  isOpen={isOpen}
+                  onOpenChange={onOpenChange}
+                  onPress={handleAction}
+                  type={action}
+                />
               </div>
             )}
           </div>

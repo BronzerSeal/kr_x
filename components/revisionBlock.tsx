@@ -1,7 +1,9 @@
+"use client";
 import { Button } from "@heroui/button";
-import { Input } from "@heroui/react";
+import { Input, useDisclosure } from "@heroui/react";
 import { DollarSign, TrainTrack } from "lucide-react";
 import { Dispatch, SetStateAction } from "react";
+import MyModal from "./MyModal";
 
 interface IProps {
   empEditDest: string;
@@ -18,6 +20,7 @@ const RevisionBlock = ({
   setEmpEditCost,
   handleResubmit,
 }: IProps) => {
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   return (
     <>
       <div className="mb-6 p-4 bg-gray-50 border border-gray-300 rounded-lg shadow-sm">
@@ -41,7 +44,7 @@ const RevisionBlock = ({
           />
         </div>
         <Button
-          onPress={handleResubmit}
+          onPress={onOpen}
           className="font-semibold w-full text-[12px] sm:text-[14px]"
           color="warning"
           variant="shadow"
@@ -50,6 +53,14 @@ const RevisionBlock = ({
           Повторно отправить на согласование
         </Button>
       </div>
+      <MyModal
+        title={"Повторно отправить заявку?"}
+        isOpen={isOpen}
+        subtitle="проверьте всё еще раз"
+        onOpenChange={onOpenChange}
+        onPress={handleResubmit}
+        type={"resubmit"}
+      />
     </>
   );
 };

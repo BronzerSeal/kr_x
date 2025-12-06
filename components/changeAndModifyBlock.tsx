@@ -1,7 +1,14 @@
-import { Button, CalendarDate, DatePicker, Input } from "@heroui/react";
-import { Dispatch, FC, SetStateAction } from "react";
-import { getLocalTimeZone, parseDate, today } from "@internationalized/date";
-import { convertDateToCalendarDate } from "@/utils/convertDateToCalendarDate";
+"use client";
+import {
+  Button,
+  CalendarDate,
+  DatePicker,
+  Input,
+  useDisclosure,
+} from "@heroui/react";
+import { Dispatch, FC, SetStateAction, useState } from "react";
+import { getLocalTimeZone, today } from "@internationalized/date";
+import MyModal from "./MyModal";
 
 interface IProps {
   editCost: number;
@@ -27,6 +34,8 @@ const ChangeAndModifyBlock: FC<IProps> = ({
   handleAction,
 }) => {
   console.log(editStart);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [action, setAction] = useState<"modify" | "rejected" | "">("");
   return (
     <div className="mb-6 p-4 bg-gray-50 border border-[#ffffffa6] rounded-lg shadow-sm">
       <h3 className="font-bold text-gray-800 mb-3">
@@ -67,11 +76,15 @@ const ChangeAndModifyBlock: FC<IProps> = ({
       </div>
       <div className="flex space-x-3 flex-wrap gap-2 sm:gap-0">
         <Button
-          onPress={handleModify}
+          // onPress={handleModify}
+          onPress={() => {
+            setAction("modify");
+            onOpen();
+          }}
           color="primary"
           size="lg"
           variant="shadow"
-          className="bg-sky-600 text-white px-4 py-2 rounded-lg font-semibold "
+          className="bg-sky-600 text-white px-4 py-2 mt-1 rounded-lg font-semibold "
         >
           Изменить и Одобрить
         </Button>
@@ -80,19 +93,30 @@ const ChangeAndModifyBlock: FC<IProps> = ({
           color="success"
           size="lg"
           variant="shadow"
-          className="bg-green-600 text-white px-4 py-2 rounded-lg   font-semibold "
+          className="bg-green-600 text-white px-4 py-2 rounded-lg mt-1  font-semibold "
         >
           Одобрить без изменений
         </Button>
         <Button
-          onPress={() => handleAction("rejected")}
+          onPress={() => {
+            setAction("rejected");
+            onOpen();
+          }}
+          // handleAction("rejected")}
           color="danger"
           size="lg"
           variant="shadow"
-          className=" text-white px-4 py-2 rounded-lg font-semibold "
+          className=" text-white px-4 py-2 rounded-lg font-semibold mt-1"
         >
           Отклонить
         </Button>
+        <MyModal
+          title={"Комментарий к изменению:"}
+          isOpen={isOpen}
+          onOpenChange={onOpenChange}
+          onPress={action === "modify" ? handleModify : handleAction}
+          type={action}
+        />
       </div>
     </div>
   );
