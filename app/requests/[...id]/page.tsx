@@ -18,6 +18,9 @@ import { formatDate } from "@/utils/formatDate";
 import { convertDateToCalendarDate } from "@/utils/convertDateToCalendarDate";
 import { parseHeroDate } from "@/utils/parseHeroDate";
 import MyModal from "@/components/MyModal";
+import translateStatus from "@/utils/translateStatus";
+import translateFulfillmentStatus from "@/utils/translateFulfillmentStatus";
+import translateCoordination from "@/utils/translateCoordination";
 
 const INITIAL_STATE: RequestDetail = {
   id: 0,
@@ -285,7 +288,11 @@ export default function RequestDetailsPage() {
 
   // ACTION: Статус выполнения (Сотрудник)
   const handleFulfillment = async (status: FulfillmentStatus) => {
-    if (!confirm(`Сменить статус выполнения на "${status}"?`)) {
+    if (
+      !confirm(
+        `Сменить статус выполнения на "${translateFulfillmentStatus(status)}"?`
+      )
+    ) {
       setFulfillmentStatus(request!.fulfillment_status);
       return;
     }
@@ -390,8 +397,8 @@ export default function RequestDetailsPage() {
           <p className="text-[17px] sm:text-xl font-semibold text-orange-600">
             Текущий статус:{" "}
             {request.status === "awaiting_hr"
-              ? "AWAITING_T-C"
-              : request.status.toUpperCase()}
+              ? "ОЖИДАНИЕ Т-К"
+              : translateStatus(request.status).toUpperCase()}
           </p>
           <span className=" text-[15px] md:text-xl text-gray-500">
             {/* {FULFILLMENT_LABELS[request.fulfillment_status]} */}
@@ -532,8 +539,10 @@ export default function RequestDetailsPage() {
                     : "bg-gray-100"
                 }`}
               >
-                <span className="font-bold uppercase">{a.action}</span> (
-                {a.approver_email || a.approver_role}){" "}
+                <span className="font-bold uppercase">
+                  {translateCoordination(a.action)}
+                </span>{" "}
+                ({a.approver_email || a.approver_role}){" "}
                 {new Date(a.date).toLocaleDateString()}
                 {a.comment && (
                   <p className="text-gray-600 italic mt-1">

@@ -1,4 +1,5 @@
 import { RequestData } from "@/types/requestsTypes";
+import translateRoles from "@/utils/translateRoles";
 import { Chip } from "@heroui/react";
 import Link from "next/link";
 
@@ -34,8 +35,8 @@ export const RequestCard = ({
     statusColor = "primary";
     statusText = `ОЖИДАЕТ ${
       request.current_approver_role === "hr"
-        ? "T-C"
-        : request.current_approver_role.toUpperCase()
+        ? "Т-К"
+        : translateRoles(request.current_approver_role).toUpperCase()
     }`;
   } else {
     statusText = request.status.toUpperCase();

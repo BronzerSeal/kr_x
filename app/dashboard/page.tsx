@@ -8,6 +8,7 @@ import { RequestCard } from "@/components/RequestCard";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/react";
+import translateName from "@/utils/translateName";
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
@@ -131,8 +132,7 @@ export default function Dashboard() {
       <div className="max-w-6xl mx-auto">
         <header className="flex flex-col sm:flex-row justify-between items-center mb-8 border-b pb-4 border-gray-300">
           <h1 className="text-2xl font-bold text-sky-700">
-            Рабочий стол (
-            {user.role === "hr" ? "Travel Coordinator" : user.role})
+            Рабочий стол ({translateName(user.role)})
           </h1>
           <div className="flex items-center gap-8 sm:gap-4 mt-2 sm:mt-0">
             <span className="text-sm text-gray-600">Привет, {user.email}!</span>

@@ -4,9 +4,11 @@ import { useRouter } from "next/navigation";
 import { signInWithCredentials } from "@/actions/sign-in";
 import { useAuthStore } from "@/store/auth.store";
 import { Button } from "@heroui/button";
-import { Input } from "@heroui/react";
+import { Chip, Input } from "@heroui/react";
 import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
+import { Tooltip } from "@heroui/tooltip";
+import { useGeoLocation } from "@/hooks/useGeoLocation";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -15,9 +17,16 @@ export default function LoginPage() {
   });
   const [isVisible, setIsVisible] = useState(false);
   const toggleVisibility = () => setIsVisible(!isVisible);
+  const [open, setOpen] = useState(false);
 
   const router = useRouter();
   const { isAuth } = useAuthStore();
+
+  //-----------------------------------------
+  // const adress = useGeoLocation();
+  // console.log(adress);
+
+  //-----------------------------------------
 
   // Проверяем, вошел ли пользователь, сразу перенаправляем на Dashboard
   useEffect(() => {
@@ -46,9 +55,29 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md border border-gray-200">
-        <h1 className="text-3xl font-bold text-center text-sky-700 mb-6">
-          SkyWay Travel Portal
-        </h1>
+        <div className="flex justify-center gap-4">
+          <h1 className="text-3xl font-bold text-center text-sky-700 mb-6">
+            SkyWay Travel Portal
+          </h1>
+          <Tooltip
+            content="Ваш логин, как правило, совпадает с корпоративным адресом электронной почты. При возникновении проблем обратитесь к руководителю."
+            placement="top"
+            showArrow
+            className="w-[250px]"
+            isOpen={open}
+            onOpenChange={(open) => setOpen(open)}
+            isDismissable={true}
+          >
+            <Chip
+              size="lg"
+              className="mt-[3px]"
+              color="primary"
+              onClick={() => setOpen(!open)}
+            >
+              i
+            </Chip>
+          </Tooltip>
+        </div>
 
         <p className="text-center text-sm text-gray-500 mb-4">
           Демо-логины: anna, ivan, olga, petr, stepan (+ gmail.com)

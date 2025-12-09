@@ -36,6 +36,28 @@ const ChangeAndModifyBlock: FC<IProps> = ({
   console.log(editStart);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [action, setAction] = useState<"modify" | "rejected" | "">("");
+  console.log("COST:", editCost);
+
+  const isModifyDisabled = (() => {
+    const now = today(getLocalTimeZone());
+
+    if (editCost >= 200000) return true;
+
+    if (!isManager) return false; // если не менеджер — не трогаем кнопку
+
+    if (!editStart || !editEnd) return true; // даты не выбраны
+
+    // \Начало не может быть раньше сегодняшнего дня
+    if (editStart.compare(now) < 0) return true;
+
+    if (editEnd.compare(editStart) < 0) return true; // конец раньше начала
+
+    const maxEnd = editStart.add({ months: 1 });
+    if (editEnd.compare(maxEnd) > 0) return true; // больше месяца
+
+    return false;
+  })();
+
   return (
     <div className="mb-6 p-4 bg-gray-50 border border-[#ffffffa6] rounded-lg shadow-sm">
       <h3 className="font-bold text-gray-800 mb-3">
@@ -77,6 +99,7 @@ const ChangeAndModifyBlock: FC<IProps> = ({
       <div className="flex space-x-3 flex-wrap gap-2 sm:gap-0">
         <Button
           // onPress={handleModify}
+          isDisabled={isModifyDisabled}
           onPress={() => {
             setAction("modify");
             onOpen();
