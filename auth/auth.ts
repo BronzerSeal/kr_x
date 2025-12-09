@@ -16,7 +16,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       authorize: async (credentials) => {
         try {
-          console.log("INFORMATION:", credentials);
           if (!credentials?.email || !credentials?.password) {
             throw new Error("Email и пароль обязательны");
           }
@@ -26,14 +25,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           );
 
           const user = await getUserFromDb(email);
-          console.log("USER FROM DB:", user);
 
           if (!user || !user.password) {
             throw new Error("Неверный ввод данных");
           }
 
           const isPasswordValid = password === user.password;
-          console.log(isPasswordValid);
 
           if (!isPasswordValid) {
             throw new Error("Неверный ввод данных");

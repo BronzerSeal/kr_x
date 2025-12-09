@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 
-type Address = {
+export type Address = {
   house_number?: string;
   road?: string;
   city?: string;
@@ -34,7 +34,6 @@ export function useGeoLocation() {
           "https://nominatim.openstreetmap.org/reverse",
           {
             params: { lat: latitude, lon: longitude, format: "json" },
-            headers: { "User-Agent": "MyApp/1.0" }, // Nominatim требует User-Agent
           }
         );
 

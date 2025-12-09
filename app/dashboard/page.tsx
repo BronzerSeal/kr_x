@@ -24,14 +24,10 @@ export default function Dashboard() {
 
     if (session.user.role === "security") {
       const resp = await getAllRequests();
-      console.log(resp);
       setRequests(resp);
-      console.log(requests);
     } else {
       const resp = await getRequests(session?.user?.id, session.user?.role);
-      console.log(resp);
       setRequests(resp);
-      console.log(requests);
     }
   };
 
@@ -122,8 +118,7 @@ export default function Dashboard() {
     setActiveTab("all_active_by_role");
 
   const displayRequests = getFilteredRequests(activeTab);
-  console.log(displayRequests);
-  // console.log("TAB: ", activeTab);
+  // console.log(displayRequests);
 
   if (!user || status === "loading")
     return <div className="p-8">Загрузка...</div>;

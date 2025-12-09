@@ -33,10 +33,8 @@ const ChangeAndModifyBlock: FC<IProps> = ({
   handleModify,
   handleAction,
 }) => {
-  console.log(editStart);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [action, setAction] = useState<"modify" | "rejected" | "">("");
-  console.log("COST:", editCost);
 
   const isModifyDisabled = (() => {
     const now = today(getLocalTimeZone());

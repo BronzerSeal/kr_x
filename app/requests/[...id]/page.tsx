@@ -21,6 +21,8 @@ import MyModal from "@/components/MyModal";
 import translateStatus from "@/utils/translateStatus";
 import translateFulfillmentStatus from "@/utils/translateFulfillmentStatus";
 import translateCoordination from "@/utils/translateCoordination";
+import { Address, useGeoLocation } from "@/hooks/useGeoLocation";
+import { getCountryByCity } from "@/utils/getCountryByCity";
 
 const INITIAL_STATE: RequestDetail = {
   id: 0,
@@ -140,7 +142,6 @@ export default function RequestDetailsPage() {
     files: FileList,
     shouldReload = true
   ) => {
-    console.log("REPORT FILES:", files);
     if (!request?.id || !user) return;
 
     const formData = new FormData();
@@ -196,7 +197,6 @@ export default function RequestDetailsPage() {
     if (comment === null) return;
 
     try {
-      console.log("ACTION: ", action);
       await axios.post("/api/approval", {
         request_id: request?.id,
         approver_role: user.role,
@@ -325,7 +325,6 @@ export default function RequestDetailsPage() {
       await handleDoc("receipts", selectedReportFiles, false);
 
       // 5️⃣ Отправляем запрос через Axios
-      console.log("LINE 336");
       const response = await axios.post("/api/fulfillment", {
         request_id: request?.id,
         user_id: user.id,
@@ -378,7 +377,7 @@ export default function RequestDetailsPage() {
     isCreator &&
     request.fulfillment_status === "returned" &&
     !request.report_added;
-  console.log(request);
+  // console.log(request);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -462,7 +461,7 @@ export default function RequestDetailsPage() {
         {/* БЛОК СТАНДАРТНОГО ОДОБРЕНИЯ */}
         {canApprove && <StandartApprove handleAction={handleAction} />}
 
-        {/* БЛОК УПРАВЛЕНИЯ ВЫПОЛНЕНИЕМ (Сотрудник) */}
+        {/* БЛОК РАПОРТА  */}
         {isCreator && request.status === "awaiting_employee_action" && (
           <ControlBlock
             fulfillmentStatus={fulfillmentStatus}
@@ -472,6 +471,7 @@ export default function RequestDetailsPage() {
             setReportText={setReportText}
             setSelectedReportFiles={setSelectedReportFiles}
             handleReportSubmit={handleReportSubmit}
+            destination={request.destination}
           />
         )}
 

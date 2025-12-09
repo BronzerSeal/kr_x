@@ -8,7 +8,6 @@ import { Chip, Input } from "@heroui/react";
 import { toast } from "react-toastify";
 import { Eye, EyeOff } from "lucide-react";
 import { Tooltip } from "@heroui/tooltip";
-import { useGeoLocation } from "@/hooks/useGeoLocation";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({

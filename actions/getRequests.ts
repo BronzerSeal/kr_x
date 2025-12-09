@@ -24,7 +24,6 @@ export async function getRequests(userId: string, userRole: string) {
   return response;
 }
 export async function getRequestsByRequestID(requestId: number) {
-  console.log("employeeId:", requestId);
   const response = await prisma.request.findMany({
     where: { id: requestId },
     include: {
@@ -37,7 +36,6 @@ export async function getRequestsByRequestID(requestId: number) {
       receiptFiles: true,
     },
   });
-  console.log("response", response);
   return response;
 }
 

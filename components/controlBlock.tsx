@@ -1,8 +1,11 @@
 "use client";
 import { FulfillmentStatus } from "@/types/requestsTypes";
-import { Dispatch, FC, SetStateAction } from "react";
+import { Dispatch, FC, SetStateAction, useEffect, useState } from "react";
 import MyModal from "./MyModal";
-import { useDisclosure } from "@heroui/react";
+import { Checkbox, useDisclosure } from "@heroui/react";
+import { Address, useGeoLocation } from "@/hooks/useGeoLocation";
+import { getCountryByCity } from "@/utils/getCountryByCity";
+import GeoCheckbox from "./common/GeoCheckbox";
 
 interface IProps {
   fulfillmentStatus: string;
@@ -12,6 +15,7 @@ interface IProps {
   setReportText: Dispatch<SetStateAction<string>>;
   setSelectedReportFiles: Dispatch<SetStateAction<FileList | null>>;
   handleReportSubmit: () => void;
+  destination: string;
 }
 
 const ControlBlock: FC<IProps> = ({
@@ -22,8 +26,26 @@ const ControlBlock: FC<IProps> = ({
   setReportText,
   setSelectedReportFiles,
   handleReportSubmit,
+  destination,
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  //геолокация
+  const [myAdress, setMyAdress] = useState<Address | null>(null);
+  const [cityCountry, setCityCountry] = useState<Address | null>(null);
+  const getAdress = async () => {
+    const nowAdress = await useGeoLocation();
+    setMyAdress(nowAdress);
+  };
+  getAdress();
+  useEffect(() => {
+    if (!destination) return;
+    const fetchCity = async () => {
+      const nowAdress = await getCountryByCity(destination);
+      setCityCountry(nowAdress);
+    };
+    fetchCity();
+  }, [destination]);
+
   return (
     <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg shadow-sm">
       <h3 className="font-bold text-purple-800 mb-3">
@@ -47,6 +69,11 @@ const ControlBlock: FC<IProps> = ({
       {(fulfillmentStatus === "returned" || !requestReport) && (
         <div className="mt-4 border-t pt-4">
           <h4 className="font-semibold mb-2">Отчет о выполнении</h4>
+          {fulfillmentStatus === "in_progress" && (
+            <div className="mb-2">
+              <GeoCheckbox myAdress={myAdress} cityCountry={cityCountry} />
+            </div>
+          )}
           <textarea
             className="w-full border p-2  rounded mb-2 h-32"
             placeholder="Детальный отчет о поездке..."
