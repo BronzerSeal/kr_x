@@ -68,6 +68,7 @@ model Request {
   employee_id            String
   created_by_role        String
   destination            String
+  destinationAprroved    Boolean   @default(false)
   purpose                String
   start_date             DateTime
   end_date               DateTime

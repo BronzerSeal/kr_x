@@ -6,6 +6,7 @@ import { Checkbox, useDisclosure } from "@heroui/react";
 import { Address, useGeoLocation } from "@/hooks/useGeoLocation";
 import { getCountryByCity } from "@/utils/getCountryByCity";
 import GeoCheckbox from "./common/GeoCheckbox";
+import { approveDestination } from "@/actions/approveDestination";
 
 interface IProps {
   fulfillmentStatus: string;
@@ -16,6 +17,8 @@ interface IProps {
   setSelectedReportFiles: Dispatch<SetStateAction<FileList | null>>;
   handleReportSubmit: () => void;
   destination: string;
+  request_id: number;
+  isDestinationApproved: boolean;
 }
 
 const ControlBlock: FC<IProps> = ({
@@ -27,6 +30,8 @@ const ControlBlock: FC<IProps> = ({
   setSelectedReportFiles,
   handleReportSubmit,
   destination,
+  request_id,
+  isDestinationApproved,
 }) => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   //геолокация
@@ -71,7 +76,12 @@ const ControlBlock: FC<IProps> = ({
           <h4 className="font-semibold mb-2">Отчет о выполнении</h4>
           {fulfillmentStatus === "in_progress" && (
             <div className="mb-2">
-              <GeoCheckbox myAdress={myAdress} cityCountry={cityCountry} />
+              <GeoCheckbox
+                myAdress={myAdress}
+                cityCountry={cityCountry}
+                request_id={request_id}
+                isApproved={isDestinationApproved}
+              />
             </div>
           )}
           <textarea

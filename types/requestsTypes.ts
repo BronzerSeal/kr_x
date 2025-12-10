@@ -43,6 +43,7 @@ export interface RequestData {
   id: number;
   employee_id: number;
   destination: string;
+  destinationAprroved: boolean;
   purpose: string;
   start_date: string;
   end_date: string;

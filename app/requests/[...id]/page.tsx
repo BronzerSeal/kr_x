@@ -472,6 +472,8 @@ export default function RequestDetailsPage() {
             setSelectedReportFiles={setSelectedReportFiles}
             handleReportSubmit={handleReportSubmit}
             destination={request.destination}
+            request_id={request.id}
+            isDestinationApproved={request.destinationAprroved}
           />
         )}
 
