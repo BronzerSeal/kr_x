@@ -23,6 +23,7 @@ import translateFulfillmentStatus from "@/utils/translateFulfillmentStatus";
 import translateCoordination from "@/utils/translateCoordination";
 import { Address, useGeoLocation } from "@/hooks/useGeoLocation";
 import { getCountryByCity } from "@/utils/getCountryByCity";
+import GeoApproveAlert from "@/components/common/GeoApproveAlert";
 
 const INITIAL_STATE: RequestDetail = {
   id: 0,
@@ -377,7 +378,7 @@ export default function RequestDetailsPage() {
     isCreator &&
     request.fulfillment_status === "returned" &&
     !request.report_added;
-  // console.log(request);
+  console.log(request);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -422,6 +423,7 @@ export default function RequestDetailsPage() {
             </ul>
           </div>
         )}
+        {request.destinationAprroved && <GeoApproveAlert />}
 
         <DocumentBlock
           request={request}
