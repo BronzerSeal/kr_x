@@ -116,19 +116,19 @@ export default function RequestDetailsPage() {
 
         if (!session.user) return;
         // Mark seen: Отметка о просмотре для снятия колокольчика
-        // if (
-        //   found.is_modified &&
-        //   found.last_modified_actor_id !== session.user.id &&
-        //   !found.viewedBy.includes(session.user.id)
-        // ) {
-        //   const formData = new FormData();
+        if (
+          found.is_modified &&
+          found.last_modified_actor_id !== session.user.id &&
+          !found.viewedBy.includes(session.user.id)
+        ) {
+          const formData = new FormData();
 
-        //   formData.append("action", "mark_seen");
-        //   formData.append("request_id", String(found.id));
-        //   formData.append("user_id", String(session.user.id));
+          formData.append("action", "mark_seen");
+          formData.append("request_id", String(found.id));
+          formData.append("user_id", String(session.user.id));
 
-        //   axios.post("/api/requests", formData);
-        // }
+          axios.post("/api/requests/mark-seen", formData);
+        }
       } else router.replace("/dashboard");
     }
   };
