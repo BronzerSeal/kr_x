@@ -41,17 +41,16 @@ const ChangeAndModifyBlock: FC<IProps> = ({
 
     if (editCost >= 200000) return true;
 
-    if (!isManager) return false; // если не менеджер — не трогаем кнопку
+    if (!isManager) return false;
 
-    if (!editStart || !editEnd) return true; // даты не выбраны
+    if (!editStart || !editEnd) return true;
 
-    // \Начало не может быть раньше сегодняшнего дня
     if (editStart.compare(now) < 0) return true;
 
-    if (editEnd.compare(editStart) < 0) return true; // конец раньше начала
+    if (editEnd.compare(editStart) < 0) return true;
 
     const maxEnd = editStart.add({ months: 1 });
-    if (editEnd.compare(maxEnd) > 0) return true; // больше месяца
+    if (editEnd.compare(maxEnd) > 0) return true;
 
     return false;
   })();

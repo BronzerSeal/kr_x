@@ -62,6 +62,26 @@ export default function NewRequestPage() {
     }
   };
 
+  const isModifyDisabled = (() => {
+    const now = today(getLocalTimeZone());
+
+    if (!costEstimate) return true;
+    if (!destination) return true;
+    if (!purpose) return true;
+    if (costEstimate >= 200000) return true;
+
+    if (!startDate || !endDate) return true;
+
+    if (startDate.compare(now) < 0) return true;
+
+    if (endDate.compare(startDate) < 0) return true;
+
+    const maxEnd = startDate.add({ months: 1 });
+    if (endDate.compare(maxEnd) > 0) return true;
+
+    return false;
+  })();
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="bg-white shadow p-5 sm:p-8 max-w-2xl mx-auto rounded-lg">
@@ -152,7 +172,13 @@ export default function NewRequestPage() {
             />
           </div>
 
-          <Button type="submit" className="w-full" color="primary" size="lg">
+          <Button
+            type="submit"
+            className="w-full"
+            color="primary"
+            size="lg"
+            isDisabled={isModifyDisabled}
+          >
             Отправить на согласование
           </Button>
         </form>
