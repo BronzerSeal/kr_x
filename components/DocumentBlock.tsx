@@ -1,6 +1,7 @@
 import { RequestDetail } from "@/types/requestsTypes";
 import { DocumentSection } from "./DocumentSection";
 import { FC } from "react";
+import { DocumentPasswordSection } from "./DocumentPasswordSection";
 
 interface IProps {
   request: RequestDetail;
@@ -23,7 +24,7 @@ export const DocumentBlock: FC<IProps> = ({
     <>
       <h2 className="text-xl font-bold text-gray-800 mb-3">Документы</h2>
       <div className="grid md:grid-cols-2 gap-4 mb-6">
-        <DocumentSection
+        <DocumentPasswordSection
           title="Паспортные данные"
           files={request.passportPhotos}
           type="passport"

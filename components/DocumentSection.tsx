@@ -1,6 +1,5 @@
 import { FileAttachment } from "@/types/requestsTypes";
 
-// 🔥 УЛУЧШЕННЫЙ КОМПОНЕНТ ДЛЯ ДОКУМЕНТОВ
 export const DocumentSection = ({
   title,
   files,
@@ -9,11 +8,9 @@ export const DocumentSection = ({
   handleUpload,
   handleDelete,
 }: any) => {
-  // Вспомогательная функция для обработки выбора файла
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       handleUpload(type, e.target.files);
-      // Сброс значения инпута для повторной загрузки того же файла
       e.target.value = "";
     }
   };

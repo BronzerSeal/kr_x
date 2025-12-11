@@ -7,13 +7,16 @@ import { getAllRequests, getRequests } from "@/actions/getRequests";
 import { RequestCard } from "@/components/RequestCard";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "@heroui/button";
-import { Chip } from "@heroui/react";
+import { Chip, Select, SelectItem } from "@heroui/react";
 import translateName from "@/utils/translateName";
+import { months } from "@/config/filter.config";
 
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("my_requests");
   const [requests, setRequests] = useState<any>([]);
+  const [chooseMonth, setChooseMonth] = useState<string>("");
+  console.log("MONTH; ", chooseMonth);
 
   const { setAuthState } = useAuthStore();
   const { data: session, status } = useSession();
@@ -48,38 +51,25 @@ export default function Dashboard() {
   const getFilteredRequests = (tab: string) => {
     if (!user) return [];
 
-    return requests.filter((req) => {
+    // 1) Фильтр по логике ролей и вкладок
+    let filtered = requests.filter((req) => {
       const isCreator = req.employee_id === user.id;
       const isParticipated = req.approvals?.some(
         (a) => a.approver_role === user.role
       );
-
       const isSecurity = user.role === "security";
 
-      // 📌 Если SECURITY — особые правила:
       if (isSecurity) {
-        if (tab === "my_requests") {
-          return false; // У безопасника нет "моих заявок"
-        }
-
-        if (tab === "awaiting_approval") {
+        if (tab === "my_requests") return false;
+        if (tab === "awaiting_approval")
           return req.status !== "completed" && req.status !== "rejected";
-        }
-
-        if (tab === "all_active_by_role") {
+        if (tab === "all_active_by_role")
           return req.status !== "completed" && req.status !== "rejected";
-        }
-
-        if (tab === "archive") {
+        if (tab === "archive")
           return req.status === "completed" || req.status === "rejected";
-        }
 
         return true;
       }
-
-      // ==============================
-      // ✨ ЛОГИКА ДЛЯ ДРУГИХ РОЛЕЙ
-      // ==============================
 
       if (tab === "my_requests") {
         return (
@@ -110,6 +100,17 @@ export default function Dashboard() {
 
       return false;
     });
+
+    // 2) Фильтр по месяцу
+    if (chooseMonth) {
+      filtered = filtered.filter((req) => {
+        const date = new Date(req.start_date);
+        const reqMonth = String(date.getMonth() + 1).padStart(2, "0");
+        return reqMonth === chooseMonth;
+      });
+    }
+
+    return filtered;
   };
 
   // В зависимости от роли, устанавливаем вкладки
@@ -118,7 +119,7 @@ export default function Dashboard() {
     setActiveTab("all_active_by_role");
 
   const displayRequests = getFilteredRequests(activeTab);
-  // console.log(displayRequests);
+  console.log(displayRequests);
 
   if (!user || status === "loading")
     return <div className="p-8">Загрузка...</div>;
@@ -151,56 +152,72 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <div className="flex gap-4 mb-6 border-b border-gray-300">
-          {user.role === "employee" && (
-            <button
-              onClick={() => setActiveTab("my_requests")}
-              className={`pb-2 ${
-                activeTab === "my_requests"
-                  ? "border-b-2 border-sky-500 font-semibold"
-                  : "text-gray-600"
-              }`}
-            >
-              Мои заявки
-            </button>
-          )}
-          {isApproverRole && (
-            <>
-              {session?.user?.role !== "security" && (
-                <button
-                  onClick={() => setActiveTab("awaiting_approval")}
-                  className={`pb-2 ${
-                    activeTab === "awaiting_approval"
-                      ? "border-b-2 border-sky-500 font-semibold"
-                      : "text-gray-600"
-                  }`}
-                >
-                  Ожидают меня (
-                  {getFilteredRequests("awaiting_approval").length})
-                </button>
-              )}
+        <div className="flex justify-between mb-6 border-b border-gray-300">
+          <div className="flex gap-4">
+            {user.role === "employee" && (
               <button
-                onClick={() => setActiveTab("all_active_by_role")}
+                onClick={() => setActiveTab("my_requests")}
                 className={`pb-2 ${
-                  activeTab === "all_active_by_role"
+                  activeTab === "my_requests"
                     ? "border-b-2 border-sky-500 font-semibold"
                     : "text-gray-600"
                 }`}
               >
-                Все активные
+                Мои заявки
               </button>
-            </>
-          )}
-          <button
-            onClick={() => setActiveTab("archive")}
-            className={`pb-2 ${
-              activeTab === "archive"
-                ? "border-b-2 border-sky-500 font-semibold"
-                : "text-gray-600"
-            }`}
+            )}
+            {isApproverRole && (
+              <>
+                {session?.user?.role !== "security" && (
+                  <button
+                    onClick={() => setActiveTab("awaiting_approval")}
+                    className={`pb-2 ${
+                      activeTab === "awaiting_approval"
+                        ? "border-b-2 border-sky-500 font-semibold"
+                        : "text-gray-600"
+                    }`}
+                  >
+                    Ожидают меня (
+                    {getFilteredRequests("awaiting_approval").length})
+                  </button>
+                )}
+                <button
+                  onClick={() => setActiveTab("all_active_by_role")}
+                  className={`pb-2 ${
+                    activeTab === "all_active_by_role"
+                      ? "border-b-2 border-sky-500 font-semibold"
+                      : "text-gray-600"
+                  }`}
+                >
+                  Все активные
+                </button>
+              </>
+            )}
+            <button
+              onClick={() => setActiveTab("archive")}
+              className={`pb-2 ${
+                activeTab === "archive"
+                  ? "border-b-2 border-sky-500 font-semibold"
+                  : "text-gray-600"
+              }`}
+            >
+              Архив
+            </button>
+          </div>
+          <Select
+            label="Фильтр"
+            placeholder="Выберите месяц"
+            onChange={(e) => setChooseMonth(e.target.value)}
+            className="w-[150px] pb-1"
+            size="sm"
+            variant="bordered"
           >
-            Архив
-          </button>
+            {months.map((m) => (
+              <SelectItem key={m.value} value={m.value}>
+                {m.label}
+              </SelectItem>
+            ))}
+          </Select>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
